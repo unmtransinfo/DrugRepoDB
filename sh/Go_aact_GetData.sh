@@ -1,6 +1,8 @@
 #!/bin/bash
 ###
 # Get AACT data for DrugRepoDB.
+# For an account see https://aact.ctti-clinicaltrials.org/connect
+# Alternately, download from https://aact.ctti-clinicaltrials.org/pipe_files
 
 DBHOST="aact-db.ctti-clinicaltrials.org"
 DBPORT="5432"
