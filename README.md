@@ -1,5 +1,9 @@
 # A Standard Database for Drug Repositioning
 
+___NOTE: The purpose of this fork (from
+<https://github.com/adam-sam-brown/repoDB>) is to explore updating this
+resource with the latest versions of AACT and DrugCentral.___
+
 ## AUTHORS
 Adam S Brown (adam-sam-brown) [1], Chirag J Patel (chiragjp) [1]
 
