@@ -35,15 +35,11 @@ s.disposition_first_posted_date_type, \
 s.last_update_submitted_qc_date, \
 s.last_update_posted_date, \
 s.last_update_posted_date_type, \
-s.start_month_year, \
 s.start_date_type, \
 s.start_date, \
-s.verification_month_year, \
 s.verification_date, \
-s.completion_month_year, \
 s.completion_date_type, \
 s.completion_date, \
-s.primary_completion_month_year, \
 s.primary_completion_date_type, \
 s.primary_completion_date, \
 s.target_duration, \
@@ -62,6 +58,7 @@ s.limitations_and_caveats, \
 s.number_of_arms, \
 s.number_of_groups, \
 s.biospec_retention, \
+s.biospec_description, \
 s.why_stopped, \
 s.has_expanded_access, \
 s.expanded_access_type_individual, \
@@ -73,8 +70,6 @@ s.is_fda_regulated_device, \
 s.is_unapproved_device, \
 s.is_ppsd, \
 s.is_us_export, \
-s.biospec_retention, \
-s.biospec_description, \
 s.ipd_time_frame, \
 s.ipd_access_criteria, \
 s.ipd_url, \
@@ -84,11 +79,11 @@ s.created_at, \
 s.updated_at"
 
 ###
-psql -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "COPY (SELECT $cols, i.id AS intervention_id, i.name AS drug_name FROM studies s JOIN interventions i ON i.nct_id = s.nct_id WHERE s.study_type = 'Interventional' AND i.intervention_type = 'Drug')  TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t')" |gzip -c >raw/AACT/studies.tsv
+psql -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "COPY (SELECT $cols, i.id AS intervention_id, i.name AS drug_name FROM studies s JOIN interventions i ON i.nct_id = s.nct_id WHERE s.study_type = 'Interventional' AND i.intervention_type = 'Drug')  TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t')" |gzip -c >raw/AACT/studies.tsv.gz
 
 ###
 # intervention_browse.txt
 # MESH_INTERVENTION_ID|NCT_ID|MESH_TERM
 
 ###
-psql -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "COPY (SELECT bi.id AS browse_intervention_id, bi.nct_id, bi.mesh_term, i.name AS drug_name FROM browse_interventions bi JOIN interventions i ON i.nct_id = bi.nct_id WHERE i.intervention_type = 'Drug')  TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t')" |gzip -c >raw/AACT/intervention_browse.tsv
+psql -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "COPY (SELECT bi.id AS browse_intervention_id, bi.nct_id, bi.mesh_term, i.name AS drug_name FROM browse_interventions bi JOIN interventions i ON i.nct_id = bi.nct_id WHERE i.intervention_type = 'Drug')  TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t')" |gzip -c >raw/AACT/intervention_browse.tsv.gz
