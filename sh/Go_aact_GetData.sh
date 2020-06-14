@@ -87,3 +87,9 @@ psql -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "COPY (SELECT $cols, i.id AS 
 
 ###
 psql -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "COPY (SELECT bi.id AS browse_intervention_id, bi.nct_id, bi.mesh_term, i.name AS drug_name FROM browse_interventions bi JOIN interventions i ON i.nct_id = bi.nct_id WHERE i.intervention_type = 'Drug')  TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t')" |gzip -c >raw/AACT/intervention_browse.tsv.gz
+
+###
+# condition_browse.txt ??
+
+# conditions.txt ??
+# NCT_ID, CONDITION, ?

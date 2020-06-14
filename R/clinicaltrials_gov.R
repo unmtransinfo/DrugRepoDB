@@ -30,15 +30,15 @@ setDT(intven)
 # NCTID consistent
 clin <- clin[grepl("^NCT", NCT_ID)]
 # Phase annotated
-clin <- clin[PHASE %in% c("Phase 0", "Phase 1", "Phase 1/Phase 2", "Phase 2", "Phase 2/Phase 3", "Phase 3")]
+clin <- clin[phase %in% c("Phase 0", "Phase 1", "Phase 1/Phase 2", "Phase 2", "Phase 2/Phase 3", "Phase 3")]
 # Failed Only
-clin <- clin[OVERALL_STATUS %in% c("Suspended", "Terminated", "Withdrawn")]
+clin <- clin[overall_status %in% c("Suspended", "Terminated", "Withdrawn")]
 # Select useful columns
-clin <- clin[, .(NCT_ID, PHASE, OVERALL_STATUS, WHY_STOPPED)]
+clin <- clin[, .(nct_id, phase, overall_status, why_stopped)]
 
 ## Add interventions
-clin$DRUG_MESH <- sapply(clin$NCT_ID, function(x) {
-    slice <- intven[NCT_ID == x]$MESH_TERM
+clin$drug_mesh <- sapply(clin$nct_id, function(x) {
+    slice <- intven[nct_id == x]$mesh_term
     if (length(slice) == 0) out <- NA
     else {
         slice <- gsub(' drug combination|, ', '', slice)
@@ -46,9 +46,9 @@ clin$DRUG_MESH <- sapply(clin$NCT_ID, function(x) {
     }
     return(out)
 })
-clin <- clin[!is.na(DRUG_MESH)]
+clin <- clin[!is.na(drug_mesh)]
 
-clin$identifier <- sapply(clin$DRUG_MESH, function(x) {
+clin$identifier <- sapply(clin$drug_mesh, function(x) {
     mesh <- unlist(strsplit(x, '\\|'))
     greplist <- rep(NA, length(mesh))
     for (i in 1:length(mesh)) {
@@ -65,8 +65,8 @@ clin <- clin[!is.na(identifier)]
 clin$DBNAME <- sapply(clin$identifier, function(x) paste(drugcentral[DrugBank.ID %in% unlist(strsplit(x, '\\|'))]$name, collapse='|'))
 
 ## Add conditions
-clin$DISEASE_MESH <- sapply(clin$NCT_ID, function(x) {
-    slice <- cond[NCT_ID == x]$CONDITION
+clin$DISEASE_MESH <- sapply(clin$nct_id, function(x) {
+    slice <- cond[nct_id == x]$CONDITION
     out <- paste(slice, collapse = '|')
     return(out)
 })
