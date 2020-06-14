@@ -12,6 +12,7 @@ DBPORT="5432"
 DBNAME="aact"
 DBUSR="jjyang"
 
+###
 # clinical_study_noclob.txt
 # NCT_ID|DOWNLOAD_DATE|DOWNLOAD_DATE_DT|ORG_STUDY_ID|BRIEF_TITLE|OFFICIAL_TITLE|ACRONYM|SOURCE|HAS_DMC|OVERALL_STATUS|START_DATE|COMPLETION_DATE|COMPLETION_DATE_TYPE|PRIMARY_COMPLETION_DATE|PRIMARY_COMPLETION_DATE_TYPE|PHASE|STUDY_TYPE|STUDY_DESIGN|NUMBER_OF_ARMS|NUMBER_OF_GROUPS|ENROLLMENT_TYPE|ENROLLMENT|BIOSPEC_RETENTION|BIOSPEC_DESCR|GENDER|MINIMUM_AGE|MAXIMUM_AGE|HEALTHY_VOLUNTEERS|SAMPLING_METHOD|STUDY_POP|VERIFICATION_DATE|LASTCHANGED_DATE|FIRSTRECEIVED_DATE|IS_SECTION_801|IS_FDA_REGULATED|WHY_STOPPED|HAS_EXPANDED_ACCESS|FIRSTRECEIVED_RESULTS_DATE|URL|TARGET_DURATION|STUDY_RANK|LIMITATIONS_AND_CAVEATS
 
@@ -78,18 +79,20 @@ s.plan_to_share_ipd_description, \
 s.created_at, \
 s.updated_at"
 
-###
 psql -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "COPY (SELECT $cols, i.id AS intervention_id, i.name AS drug_name FROM studies s JOIN interventions i ON i.nct_id = s.nct_id WHERE s.study_type = 'Interventional' AND i.intervention_type = 'Drug')  TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t')" |gzip -c >raw/AACT/studies.tsv.gz
 
 ###
 # intervention_browse.txt
 # MESH_INTERVENTION_ID|NCT_ID|MESH_TERM
 
-###
 psql -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "COPY (SELECT bi.id AS browse_intervention_id, bi.nct_id, bi.mesh_term, i.name AS drug_name FROM browse_interventions bi JOIN interventions i ON i.nct_id = bi.nct_id WHERE i.intervention_type = 'Drug')  TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t')" |gzip -c >raw/AACT/intervention_browse.tsv.gz
 
 ###
-# condition_browse.txt ??
+# condition_browse.txt ?? (Not in figshare zipfiles.)
+psql -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "COPY (SELECT nct_id, mesh_term FROM browse_conditions)  TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t')" |gzip -c >raw/AACT/condition_browse.tsv.gz
 
-# conditions.txt ??
+###
+# conditions.txt ?? (Not in figshare zipfiles.)
 # NCT_ID, CONDITION, ?
+psql -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "COPY (SELECT nct_id, name FROM conditions)  TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t')" |gzip -c >raw/AACT/conditions.tsv.gz
+

@@ -18,6 +18,7 @@ clin <- read_delim("raw/AACT/studies.tsv.gz", "\t", col_types=cols(.default=col_
 setDT(clin)
 for (tag in colnames(clin)) {
   if (grepl("_(date|at)$", tag)) {
+    message(sprintf("Converting to type Date column: %s", tag))
     clin[[tag]] <- as.Date(clin[[tag]])
   }
 }
@@ -25,10 +26,12 @@ for (tag in colnames(clin)) {
 intven <- read_delim("raw/AACT/intervention_browse.tsv.gz", "\t")
 setDT(intven)
 
+cond <- read_delim("raw/AACT/conditions.tsv.gz", "\t")
+setDT(cond)
 
 ## Pull good rows
 # NCTID consistent
-clin <- clin[grepl("^NCT", NCT_ID)]
+clin <- clin[grepl("^NCT", nct_id)]
 # Phase annotated
 clin <- clin[phase %in% c("Phase 0", "Phase 1", "Phase 1/Phase 2", "Phase 2", "Phase 2/Phase 3", "Phase 3")]
 # Failed Only
@@ -42,7 +45,7 @@ clin$drug_mesh <- sapply(clin$nct_id, function(x) {
     if (length(slice) == 0) out <- NA
     else {
         slice <- gsub(' drug combination|, ', '', slice)
-        out <- toupper(paste(slice, collapse = '|'))
+        out <- toupper(paste(sort(unique(slice)), collapse = '|'))
     }
     return(out)
 })
@@ -52,21 +55,21 @@ clin$identifier <- sapply(clin$drug_mesh, function(x) {
     mesh <- unlist(strsplit(x, '\\|'))
     greplist <- rep(NA, length(mesh))
     for (i in 1:length(mesh)) {
-        greplist[i] <- paste0('^',mesh[i],'$','|\\|',mesh[i],'$|^',mesh[i],'\\||\\|',mesh[i],'\\|')
+        greplist[i] <- paste0('^', mesh[i], '$', '|\\|', mesh[i], '$|^', mesh[i], '\\||\\|', mesh[i], '\\|')
     }
     grepcall <- paste(greplist, collapse='|')
     row <- grep(grepcall, drugcentral$SYNONYM)
     if (length(row) == 0) out <- NA
-    else out <- paste(unique(drugcentral$identifier[row]), collapse = '|')
+    else out <- paste(unique(drugcentral[row, identifier]), collapse = '|')
 })
 
 clin <- clin[!is.na(identifier)]
 #clin$DBNAME <- sapply(clin$identifier, function(x) paste(subset(dbapproved, DrugBank.ID %in% unlist(strsplit(x, '\\|')))$Name, collapse='|'))
-clin$DBNAME <- sapply(clin$identifier, function(x) paste(drugcentral[DrugBank.ID %in% unlist(strsplit(x, '\\|'))]$name, collapse='|'))
+clin$DCNAME <- sapply(clin$identifier, function(x) paste(drugcentral[identifier %in% unlist(strsplit(x, '\\|'))]$name, collapse='|'))
 
 ## Add conditions
 clin$DISEASE_MESH <- sapply(clin$nct_id, function(x) {
-    slice <- cond[nct_id == x]$CONDITION
+    slice <- cond[nct_id == x]$name
     out <- paste(slice, collapse = '|')
     return(out)
 })
