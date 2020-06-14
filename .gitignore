@@ -1,4 +1,7 @@
 raw/
+*.Rproj
+.Rhistory
+**/*.RData
 
 # Windows image file caches
 Thumbs.db

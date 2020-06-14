@@ -15,6 +15,8 @@ source('R/drugcentral.R')
 source('R/clinicaltrials_gov.R')
 source('R/umls_query.R')
 
+UMLS_VERSION <- "2020AA"  # In 2016 version was "2016AB".
+
 ## Build Indictaion Dictionary
 inddict <- data.table(raw=unlist(strsplit(drugcentral$DISEASE_MESH, '\\|')), cui=unlist(strsplit(drugcentral$DISEASE_UMLS, '\\|')), cuname=NA, semType=NA)
 inddict <- rbindlist(list(inddict, data.table(raw=unlist(strsplit(clin$DISEASE_MESH,'\\|')), cui=NA, cuname=NA, semType=NA)))
@@ -23,10 +25,10 @@ inddict <- unique(inddict)
 for (i in 1:nrow(inddict)) {
     # Get current
     raw <- inddict$raw[i]
-
+    message(sprintf("%d/%d: %s", i, nrow(inddict), raw))
     # If missing cui, attempt to fill
     if (is.na(inddict$cui[i])) {
-        cuiL <- getCUI(raw, 'normalizedString', '2016AB', F)
+        cuiL <- getCUI(raw, 'normalizedString', UMLS_VERSION, F)
         if (length(cuiL) == 1 & cuiL[[1]][1] != 'NO_CONCEPT_MAPPED_TO') inddict$cui[i] <- cuiL[[1]][1]
         # Don't allow multiple/no matches
         else inddict$cui[i] <- NA
