@@ -51,7 +51,7 @@ inddict <- inddict[semType %in% c('Disease or Syndrome', 'Neoplastic Process', '
 save(inddict, file='raw/indication_dictionary.RData')
 
 ## Build dataframe
-drug.dt <- data.table(Drug = character(), Indication = character(),
+drug_dt <- data.table(Drug = character(), Indication = character(),
                       drug_name = character(), drug_id = character(),
                       ind_name = character(), ind_id=character(),
                       sem_type = character())
@@ -88,10 +88,14 @@ drug_dt[, DetailedStatus := rep(NA, nrow(drug_dt))]
 failed <- data.table(Drug = character(), Indication = character(),
                      drug_name = character(), drug_id = character(),
                      ind_name = character(), ind_id=character(),
-                     sem_type = character())
+                     sem_type = character(),
+                     TrialStatus = character(),
+                     status = character(),
+                     phase = character(),
+                     DetailedStatus = character())
 for (i in 1:nrow(clin)) {
     # Drug Handling
-    drugs <- unlist(strsplit(clin$DBNAME[i], '\\|'))
+    drugs <- unlist(strsplit(clin$DCNAME[i], '\\|'))
     ids <- unlist(strsplit(clin$identifier[i], '\\|'))
     drugcomp <- paste0('<a href="http://www.drugbank.ca/drugs/', ids, '" target="_blank">', drugs, ' (DBID: ', ids,  ')</a>')
     
@@ -105,6 +109,7 @@ for (i in 1:nrow(clin)) {
 
     # Expand
     comp_dt_set <- expand.grid(c(1:length(drugcomp)), c(1:length(indcomp)))
+    setDT(comp_dt_set)
     comp_dt <- data.table(Drug = drugcomp[comp_dt_set$Var1], Indication = indcomp[comp_dt_set$Var2],
                          drug_name = drugs[comp_dt_set$Var1], drug_id = ids[comp_dt_set$Var1],
                          ind_name = indcunames[comp_dt_set$Var2], ind_id = indcus[comp_dt_set$Var2],
@@ -112,10 +117,10 @@ for (i in 1:nrow(clin)) {
     
     # Add status
     comp_dt[, TrialStatus := paste0('<a href="https://clinicaltrials.gov/ct2/show/', clin$NCT_ID[i], '" target="_blank">', clin$OVERALL_STATUS[i], ' (', clin$PHASE[i], ')</a>')]
-    comp_dt[, status := clin$OVERALL_STATUS[i]]
-    comp_dt[, phase := clin$PHASE[i]]
-    comp_dt[, DetailedStatus := clin$WHY_STOPPED[i]]
-    
+    comp_dt[, status := clin$overall_status[i]]
+    comp_dt[, phase := clin$phase[i]]
+    comp_dt[, DetailedStatus := clin$why_stopped[i]]
+
     # Ensure uniqueness
     goodrows <- rep(NA, nrow(comp_dt))
     for (j in 1:nrow(comp_dt)) {
