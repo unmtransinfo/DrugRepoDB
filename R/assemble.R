@@ -10,12 +10,14 @@
 library(readr)
 library(data.table)
 
-## Scripts (order important)
+## Scripts (order-dependent)
 source('R/drugcentral.R')
 source('R/clinicaltrials_gov.R')
 source('R/umls_query.R')
 
 UMLS_VERSION <- "2020AA"  # In 2016 version was "2016AB".
+
+t0 <- proc.time()
 
 ## Build Indictaion Dictionary
 inddict <- data.table(raw=unlist(strsplit(drugcentral$DISEASE_MESH, '\\|')), cui=unlist(strsplit(drugcentral$DISEASE_UMLS, '\\|')), cuname=NA, semType=NA)
@@ -142,4 +144,6 @@ drug_dt[, NCT := ifelse(NCT == '', NA, NCT)]
 # Save #
 ########
 
-save(drug_dt, file='R/drugrepodb/data/app.RData')
+save(drug_dt, file='R/drugrepodb/data/drugrepodb.RData')
+#
+message(sprintf("%s, elapsed: %.1fs", Sys.time(), (proc.time()-t0)[3]))

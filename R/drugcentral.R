@@ -53,3 +53,5 @@ drugcentral$SYNONYM <- sapply(drugcentral$struct_id, function(x) {
     else out <- toupper(paste(slice, collapse = '|'))
     return(out)
 })
+
+message("Done: (drugcentral.R)")

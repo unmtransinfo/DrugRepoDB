@@ -9,11 +9,13 @@ options(warn=-1)
 ########
 # Load Data
 ##
-load('data/app.RData')
+load('data/drugrepodb.RData')
 
 ## Status Summary Plotting
-df_status <- data.frame(status = names(table(drug_dt$status)), count = as.integer(table(drug_dt$status)))
-
+#status_dt <- data.table(status = names(table(drug_dt$status)), count = as.integer(table(drug_dt$status)))
+status_dt <- drug_dt[, .(count = .N), by=status]
+N_DRUGS <- drug_dt[, uniqueN(drug_id)]
+N_INDS <- drug_dt[, uniqueN(ind_id)]
 
 #################
 # UI Definition #
@@ -60,11 +62,11 @@ ui <- fluidPage(
     tabPanel(
       "Drug Search",
       
-      p('repoDB contains information about 1,571 currently approved drugs (as annotated in DrugBank).
+      p(sprintf('repoDB contains information about %d currently approved drugs (as curated by DrugCentral).
         To search repoDB for a specific drug, select a drug and the current statuses you\'d like to display.
-        Drugs are listed with their DrugBank IDs, for easier integration into your existing pipelines.
+        Drugs are listed with their DrugCentral and DrugBank IDs, for easier integration into your existing pipelines.
         Search results can be downloaded as a tab-separated values file using the download button below the table
-        of drug indications.'
+        of drug indications.', N_DRUGS)
         
       ),
       uiOutput('drugdrop'),
@@ -91,12 +93,11 @@ ui <- fluidPage(
     tabPanel(
       "Disease Search",
       
-      p(
-        'repoDB contains information about 2,051 diseases, all mapped to UMLS terms for easier 
+      p(sprintf('repoDB contains information about %d diseases (indications), all mapped to UMLS terms for easier 
         integration into your existing pipelines. To search for a specific disease,
         select a disease and the current statuses you\'d like to display.
         Search results can be downloaded as a tab-separated values file using the download button below the table
-        of drug indications.'
+        of drug indications.', N_INDS)
       ),
       uiOutput('inddrop'),
       checkboxGroupInput('indcheck',
@@ -122,8 +123,7 @@ ui <- fluidPage(
     tabPanel(
       "Download",
       
-      p(
-       "The full repoDB database is available for download using the button below.
+      p("The full repoDB database is available for download using the button below.
        Please note that the data is presented as-is, and not all entries have been
        validated before publication." 
       ),
@@ -186,17 +186,18 @@ ui <- fluidPage(
 #####################
 
 server <- function(input, output, session) {
+
   # Infographic definition
   output$summary_plot <- renderPlot({
-    ggplot(df_status, aes(factor(status), count)) +
-      geom_bar(stat='identity',width=0.5, aes(fill=factor(status))) +
-      geom_text(aes(label=count),vjust = 1.5, color=c('black','white','white','white'))+
+    ggplot(status_dt, aes(factor(status), count)) +
+      geom_bar(stat='identity', width=0.5, aes(fill=factor(status))) +
+      geom_text(aes(label=count), vjust = 1.5, color=c('black', 'white', 'white', 'white'))+
       labs(x=NULL, y=NULL) +
       theme_bw() +
       theme(panel.grid.major = element_blank(),
          panel.grid.minor = element_blank()) +
       theme(legend.position='none') +
-      scale_fill_manual(values=c('grey','black','black','black'))
+      scale_fill_manual(values=c('grey', 'black', 'black', 'black'))
   })
   
   # Dropmenu Definition

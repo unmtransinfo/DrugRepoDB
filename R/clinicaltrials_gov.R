@@ -73,3 +73,5 @@ clin$DISEASE_MESH <- sapply(clin$nct_id, function(x) {
     out <- paste(slice, collapse = '|')
     return(out)
 })
+
+message("Done: (clinicaltrials_gov.R)")

@@ -151,3 +151,5 @@ getCUI <- function(string, search_typ, version, verbose) {
     }
     return(concepts) 
 }
+
+message("Done: (umls_query.R)")
