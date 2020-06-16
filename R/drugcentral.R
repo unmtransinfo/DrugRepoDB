@@ -11,19 +11,20 @@ library(readr)
 library(data.table)
 
 ## Read
-identifier <- read_delim("raw/DrugCentral/identifier.tsv", "\t")
+identifier <- read_delim("raw/DrugCentral/identifier.tsv", "\t", col_types = cols(.default = col_character(), parent_match=col_logical()))
 setDT(identifier)
-indication <- read_delim("raw/DrugCentral/omop_relationship.tsv", "\t")
+indication <- read_delim("raw/DrugCentral/omop_relationship.tsv", "\t", col_types = cols(.default = col_character()))
 setDT(indication)
-synonyms <- read_delim("raw/DrugCentral/synonyms.tsv", "\t")
+synonyms <- read_delim("raw/DrugCentral/synonyms.tsv", "\t", col_types = cols(.default = col_character()))
 setDT(synonyms)
+# DrugBank not needed for approval status. Keep DrugBank IDs. Use DrugCentral preferred_name.
 #dbapproved <- read_delim('raw/DrugBank/drug_links.csv', sep=',',quote='"',header=T,stringsAsFactors = F)
 
 ## DrugBank IDs
 #drugcentral <- subset(identifier, identifier %in% dbapproved$DrugBank.ID & id_type == 'DRUGBANK_ID', select = c('struct_id', 'identifier'))
 #drugcentral$name <- sapply(drugcentral$identifier, function(x) subset(dbapproved, DrugBank.ID == x)$Name)
 
-drugcentral <- identifier[id_type=="DRUGBANK_ID", .(struct_id, identifier)]
+drugcentral <- identifier[id_type=="DRUGBANK_ID", .(struct_id, DrugBankID=identifier)]
 drugcentral <- merge(drugcentral, synonyms[preferred_name==1, .(id, name)], by.x="struct_id", by.y="id")
 
 ## Indications

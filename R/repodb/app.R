@@ -9,7 +9,7 @@ options(warn=-1)
 ########
 # Load Data
 ##
-load('data/drugrepodb.RData')
+load('data/repodb.RData')
 
 ## Status Summary Plotting
 #status_dt <- data.table(status = names(table(drug_dt$status)), count = as.integer(table(drug_dt$status)))
@@ -23,8 +23,7 @@ N_INDS <- drug_dt[, uniqueN(ind_id)]
 ui <- fluidPage(
   ## Header
   headerPanel(tags$head(tags$img(src="logo.png", height="80px", width='275px', style = "padding-left: 25px; padding-top: 15px")),
-        windowTitle="repoDB"
-  ),
+        windowTitle="repoDB: Drug Repositioning Database"),
   
   tags$br(),
   
@@ -33,7 +32,6 @@ ui <- fluidPage(
     ## Overview Panel
     tabPanel(
       "Introduction",
-      
       p("repoDB contains a standard set of drug repositioning successes and failures that can be
        used to fairly and reproducibly benchmark computational repositioning methods. repoDB data
        was extracted from ", 
@@ -52,19 +50,16 @@ ui <- fluidPage(
       
       p("You can explore the types and characteristics of data in repoDB in the plot below."),
       plotlyOutput("summary_plot")
-      
     ),
     
     ## Drug Search Panel
     tabPanel(
       "Drug Search",
-      
       p(sprintf('repoDB contains information about %d currently approved drugs (as curated by DrugCentral).
         To search repoDB for a specific drug, select a drug and the current statuses you\'d like to display.
         Drugs are listed with their DrugCentral and DrugBank IDs, for easier integration into your existing pipelines.
         Search results can be downloaded as a tab-separated values file using the download button below the table
         of drug indications.', N_DRUGS)
-        
       ),
       uiOutput('drugdrop'),
       checkboxGroupInput('drugcheck',
@@ -78,7 +73,6 @@ ui <- fluidPage(
                 choices = c('Phase 0', 'Phase 1', 'Phase 2', 'Phase 3'),
                 selected = c('Phase 0', 'Phase 1', 'Phase 2', 'Phase 3'),
                 inline = T
-                
       ),
       tags$hr(),
       dataTableOutput('drugtable'),
@@ -89,7 +83,6 @@ ui <- fluidPage(
     ),
     tabPanel(
       "Disease Search",
-      
       p(sprintf('repoDB contains information about %d diseases (indications), all mapped to UMLS terms for easier 
         integration into your existing pipelines. To search for a specific disease,
         select a disease and the current statuses you\'d like to display.
@@ -108,7 +101,6 @@ ui <- fluidPage(
                 choices = c('Phase 0', 'Phase 1', 'Phase 2', 'Phase 3'),
                 selected = c('Phase 0', 'Phase 1', 'Phase 2', 'Phase 3'),
                 inline = T
-                
       ),
       tags$hr(),
       dataTableOutput('indtable'),
@@ -119,11 +111,9 @@ ui <- fluidPage(
     ),
     tabPanel(
       "Download",
-      
       p("The full repoDB database is available for download using the button below.
        Please note that the data is presented as-is, and not all entries have been
-       validated before publication." 
-      ),
+       validated before publication."),
       downloadButton(
         outputId = 'downloadFull',
         label = 'Download the full repoDB Dataset'
@@ -131,7 +121,6 @@ ui <- fluidPage(
     ),
     tabPanel(
       "Citing repoDB",
-      
       p("To acknowledge use of the repoDB resource, please cite the following paper:" ),
       tags$code( "Brown AS and Patel CJ. repoDB: A New Standard for Drug Repositioning Validation.", em("Scientific Data."), "170029 (2017)."),
       tags$br(),
@@ -143,9 +132,9 @@ ui <- fluidPage(
         "and the 2020AA Release of the ",
         a("Unified Medical Language System.", href='https://www.nlm.nih.gov/research/umls/'),
         "Metformin and recycling symbol used under CC0 license from wikimedia commons. Database symbol by Designmodo,
-        used under a CC3.0 licnesne."
+        used under a CC3.0 license."
       ),
-      p (strong("By using the repoDB database, users agree to cite our work, as well as AACT,
+      p(strong("By using the repoDB database, users agree to cite our work, as well as AACT,
             DrugCentral, and UMLS for their role in data curation. This data is available under a ",
             a('Creative Commons Attribution 4.0 International License.',href='https://creativecommons.org/licenses/by/4.0/')
             )
@@ -164,7 +153,6 @@ ui <- fluidPage(
         tags$li(strong('v2.0-SNAPSHOT (June 12, 2020)'), ' - Updated with new versions of DrugCentral, AACT and UMLS, in cooperation with developers of DrugCentral from the University of New Mexico.')
       )
     )
-    
   ),
 
   ## Footer
@@ -186,20 +174,21 @@ server <- function(input, output, session) {
 
   # Infographic definition
   output$summary_plot <- renderPlotly({
-    plot_ly(type="bar", orientation="v", data=dcast(drug_dt[, .(count = .N), by=c("status", "sem_type")], status ~ sem_type,  value.var = "count"),
-            x=~status, y=~`Acquired Abnormality`, name="Acquired Abnormality") %>%
-      add_trace(y=~`Disease or Syndrome`, name="Disease or Syndrome") %>%
-      add_trace(y=~`Sign or Symptom`, name="Sign or Symptom") %>%
-      add_trace(y=~`Neoplastic Process`, name="Neoplastic Process") %>%
-      add_trace(y=~`Cell or Molecular Dysfunction`, name="Cell or Molecular Dysfunction") %>%
-      add_trace(y=~`Congenital Abnormality`, name="Congenital Abnormality") %>%
-      add_trace(y=~`Finding`, name="Finding") %>%
-      add_trace(y=~`Injury or Poisoning`, name="Injury or Poisoning") %>%
-      add_trace(y=~`Mental or Behavioral Dysfunction`, name="Mental or Behavioral Dysfunction") %>%
+    plot_ly(data=dcast(drug_dt[, .(count = .N), by=c("status", "sem_type")],
+            type="bar", orientation="v", status ~ sem_type,  value.var = "count"),
+            x=~status, y=~`Sign or Symptom`, name="Sign or Symptom") %>%
       add_trace(y=~`Pathologic Function`, name="Pathologic Function") %>%
-      layout(barmode="stack", xaxis=list(title="Status"), yaxis=list(title="Count"), 
-             title = list(text=paste0("Drug indication counts (N = ", nrow(drug_dt), ")"), font=list(size=14)), font=list(family="Arial", size=12),
-             legend=list(x=.8, y=1.1), margin=list(t=80, l=20, b=20, r=20))
+      add_trace(y=~`Neoplastic Process`, name="Neoplastic Process") %>%
+      add_trace(y=~`Mental or Behavioral Dysfunction`, name="Mental or Behavioral Dysfunction") %>%
+      add_trace(y=~`Injury or Poisoning`, name="Injury or Poisoning") %>%
+      add_trace(y=~`Finding`, name="Finding") %>%
+      add_trace(y=~`Disease or Syndrome`, name="Disease or Syndrome") %>%
+      add_trace(y=~`Congenital Abnormality`, name="Congenital Abnormality") %>%
+      add_trace(y=~`Cell or Molecular Dysfunction`, name="Cell or Molecular Dysfunction") %>%
+      add_trace(y=~`Acquired Abnormality`, name="Acquired Abnormality") %>%
+      layout(barmode="stack", xaxis=list(title="Trial Status"), yaxis=list(title="# of Trials"), 
+             title="", font=list(family="Arial", size=12),
+             legend=list(x=.8, y=1), margin=list(t=20, l=20, b=20, r=20))
   })
   
   # Dropmenu Definition
@@ -279,4 +268,3 @@ server <- function(input, output, session) {
 }
 
 shinyApp(ui, server)
-

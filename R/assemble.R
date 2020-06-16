@@ -60,8 +60,8 @@ drug_dt <- data.table(Drug = character(), Indication = character(),
 for (i in 1:nrow(drugcentral)) {
     # Drug Handling
     drug <- drugcentral$name[i]
-    id <- drugcentral$identifier[i]
-    drugcomp <- paste0('<a href="http://www.drugbank.ca/drugs/',id,'" target="_blank">',drug,' (DBID: ', id, ')</a>')
+    dbid <- drugcentral$DrugBankID[i]
+    drugcomp <- sprintf('<a href="http://www.drugbank.ca/drugs/%s" target="_blank">%s (DBID: %s)</a>', dbid, dbid, drug)
     
     # Indication Handling
     if (is.na(drugcentral$DISEASE_MESH[i])) next
@@ -98,8 +98,8 @@ failed <- data.table(Drug = character(), Indication = character(),
 for (i in 1:nrow(clin)) {
     # Drug Handling
     drugs <- unlist(strsplit(clin$DCNAME[i], '\\|'))
-    ids <- unlist(strsplit(clin$identifier[i], '\\|'))
-    drugcomp <- paste0('<a href="http://www.drugbank.ca/drugs/', ids, '" target="_blank">', drugs, ' (DBID: ', ids,  ')</a>')
+    dbids <- unlist(strsplit(clin$DrugBankIDs[i], '\\|'))
+    drugcomp <- sprintf('<a href="http://www.drugbank.ca/drugs/%s" target="_blank">%s (DBID: %s)</a>', dbids, drugs, dbids)
     
     # Indication Handling
     inds <- unlist(strsplit(clin$DISEASE_MESH[i], '\\|'))
@@ -118,7 +118,7 @@ for (i in 1:nrow(clin)) {
                          sem_type = indtypes[comp_dt_set$Var2])
     
     # Add status
-    comp_dt[, TrialStatus := paste0('<a href="https://clinicaltrials.gov/ct2/show/', clin$NCT_ID[i], '" target="_blank">', clin$OVERALL_STATUS[i], ' (', clin$PHASE[i], ')</a>')]
+    comp_dt[, TrialStatus := sprintf('<a href="https://clinicaltrials.gov/ct2/show/%s" target="_blank">%s (%s)</a>', clin$NCT_ID[i], clin$OVERALL_STATUS[i], clin$PHASE[i])]
     comp_dt[, status := clin$overall_status[i]]
     comp_dt[, phase := clin$phase[i]]
     comp_dt[, DetailedStatus := clin$why_stopped[i]]
@@ -144,6 +144,6 @@ drug_dt[, NCT := ifelse(NCT == '', NA, NCT)]
 # Save #
 ########
 
-save(drug_dt, file='R/drugrepodb/data/drugrepodb.RData')
+save(drug_dt, file='R/repodb/data/repodb.RData')
 #
 message(sprintf("%s, elapsed: %.1fs", Sys.time(), (proc.time()-t0)[3]))

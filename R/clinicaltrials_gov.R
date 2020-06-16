@@ -18,12 +18,12 @@ clin <- read_delim("raw/AACT/studies.tsv.gz", "\t", col_types=cols(.default=col_
 setDT(clin)
 for (tag in colnames(clin)) {
   if (grepl("_(date|at)$", tag)) {
-    message(sprintf("Converting to type Date column: %s", tag))
+    message(sprintf("Column to Date: %s", tag))
     clin[[tag]] <- as.Date(clin[[tag]])
   }
 }
 
-intven <- read_delim("raw/AACT/intervention_browse.tsv.gz", "\t")
+intven <- read_delim("raw/AACT/intervention_browse.tsv.gz", "\t", col_types = cols(.default=col_character()))
 setDT(intven)
 
 cond <- read_delim("raw/AACT/conditions.tsv.gz", "\t")
@@ -51,7 +51,7 @@ clin$drug_mesh <- sapply(clin$nct_id, function(x) {
 })
 clin <- clin[!is.na(drug_mesh)]
 
-clin$identifier <- sapply(clin$drug_mesh, function(x) {
+clin$DrugBankIDs <- sapply(clin$drug_mesh, function(x) {
     mesh <- unlist(strsplit(x, '\\|'))
     greplist <- rep(NA, length(mesh))
     for (i in 1:length(mesh)) {
@@ -60,12 +60,11 @@ clin$identifier <- sapply(clin$drug_mesh, function(x) {
     grepcall <- paste(greplist, collapse='|')
     row <- grep(grepcall, drugcentral$SYNONYM)
     if (length(row) == 0) out <- NA
-    else out <- paste(unique(drugcentral[row, identifier]), collapse = '|')
+    else out <- paste(unique(drugcentral[row, DrugBankID]), collapse = '|')
 })
 
-clin <- clin[!is.na(identifier)]
-#clin$DBNAME <- sapply(clin$identifier, function(x) paste(subset(dbapproved, DrugBank.ID %in% unlist(strsplit(x, '\\|')))$Name, collapse='|'))
-clin$DCNAME <- sapply(clin$identifier, function(x) paste(drugcentral[identifier %in% unlist(strsplit(x, '\\|'))]$name, collapse='|'))
+clin <- clin[!is.na(DrugBankIDs)]
+clin$DCNAME <- sapply(clin$DrugBankIDs, function(x) paste(drugcentral[DrugBankID %in% unlist(strsplit(x, '\\|'))]$name, collapse='|'))
 
 ## Add conditions
 clin$DISEASE_MESH <- sapply(clin$nct_id, function(x) {

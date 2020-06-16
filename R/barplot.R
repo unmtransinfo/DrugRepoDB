@@ -6,7 +6,7 @@ library(plotly)
 ########
 # Load Data
 ##
-load('R/drugrepodb/data/drugrepodb.RData')
+load('R/repodb/data/repodb.RData')
 
 status_dt <- drug_dt[, .(count = .N), by=status]
 
