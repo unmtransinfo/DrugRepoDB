@@ -1,7 +1,7 @@
 library(data.table)
 library(shiny)
 library(DT)
-library(ggplot2)
+library(plotly)
 
 ## Options
 options(warn=-1)
@@ -22,11 +22,8 @@ N_INDS <- drug_dt[, uniqueN(ind_id)]
 #################
 ui <- fluidPage(
   ## Header
-  headerPanel('',
-        tags$head(
-          tags$img(src="logo.png", height="80px", width='275px', 
-               style = "padding-left: 25px; padding-top: 15px")
-        )
+  headerPanel(tags$head(tags$img(src="logo.png", height="80px", width='275px', style = "padding-left: 25px; padding-top: 15px")),
+        windowTitle="repoDB"
   ),
   
   tags$br(),
@@ -54,7 +51,7 @@ ui <- fluidPage(
       ),
       
       p("You can explore the types and characteristics of data in repoDB in the plot below."),
-      plotOutput('summary_plot')
+      plotlyOutput("summary_plot")
       
     ),
     
@@ -136,10 +133,10 @@ ui <- fluidPage(
       "Citing repoDB",
       
       p("To acknowledge use of the repoDB resource, please cite the following paper:" ),
-      tags$code( "Brown AS and Patel CJ. repoDB: A New Standard for Drug Repositioning Validation.", em("Scientific Data."), "170029 (2017-2020)."),
+      tags$code( "Brown AS and Patel CJ. repoDB: A New Standard for Drug Repositioning Validation.", em("Scientific Data."), "170029 (2017)."),
       tags$br(),
       tags$br(),
-      p("repoDB was built using the June 12, 2020 build of ",
+      p("repoDB was built using the May 16, 2020 release of ",
         a("DrugCentral,", href='http://drugcentral.org/download'),
         "the live version, accessed in June 2020, of the ",
         a("AACT database,", href='https://www.ctti-clinicaltrials.org/aact-database'),
@@ -188,16 +185,21 @@ ui <- fluidPage(
 server <- function(input, output, session) {
 
   # Infographic definition
-  output$summary_plot <- renderPlot({
-    ggplot(status_dt, aes(factor(status), count)) +
-      geom_bar(stat='identity', width=0.5, aes(fill=factor(status))) +
-      geom_text(aes(label=count), vjust = 1.5, color=c('black', 'white', 'white', 'white'))+
-      labs(x=NULL, y=NULL) +
-      theme_bw() +
-      theme(panel.grid.major = element_blank(),
-         panel.grid.minor = element_blank()) +
-      theme(legend.position='none') +
-      scale_fill_manual(values=c('grey', 'black', 'black', 'black'))
+  output$summary_plot <- renderPlotly({
+    plot_ly(type="bar", orientation="v", data=dcast(drug_dt[, .(count = .N), by=c("status", "sem_type")], status ~ sem_type,  value.var = "count"),
+            x=~status, y=~`Acquired Abnormality`, name="Acquired Abnormality") %>%
+      add_trace(y=~`Disease or Syndrome`, name="Disease or Syndrome") %>%
+      add_trace(y=~`Sign or Symptom`, name="Sign or Symptom") %>%
+      add_trace(y=~`Neoplastic Process`, name="Neoplastic Process") %>%
+      add_trace(y=~`Cell or Molecular Dysfunction`, name="Cell or Molecular Dysfunction") %>%
+      add_trace(y=~`Congenital Abnormality`, name="Congenital Abnormality") %>%
+      add_trace(y=~`Finding`, name="Finding") %>%
+      add_trace(y=~`Injury or Poisoning`, name="Injury or Poisoning") %>%
+      add_trace(y=~`Mental or Behavioral Dysfunction`, name="Mental or Behavioral Dysfunction") %>%
+      add_trace(y=~`Pathologic Function`, name="Pathologic Function") %>%
+      layout(barmode="stack", xaxis=list(title="Status"), yaxis=list(title="Count"), 
+             title = list(text=paste0("Drug indication counts (N = ", nrow(drug_dt), ")"), font=list(size=14)), font=list(family="Arial", size=12),
+             legend=list(x=.8, y=1.1), margin=list(t=80, l=20, b=20, r=20))
   })
   
   # Dropmenu Definition
