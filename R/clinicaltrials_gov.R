@@ -33,7 +33,9 @@ setDT(cond)
 # NCTID consistent
 clin <- clin[grepl("^NCT", nct_id)]
 # Phase annotated
-clin <- clin[phase %in% c("Phase 0", "Phase 1", "Phase 1/Phase 2", "Phase 2", "Phase 2/Phase 3", "Phase 3")]
+# 2020: "Phase 0" nonexistent. "Early Phase 1" may be new name.
+#clin <- clin[phase %in% c("Phase 0", "Phase 1", "Phase 1/Phase 2", "Phase 2", "Phase 2/Phase 3", "Phase 3")]
+clin <- clin[phase %in% c("Phase 0", "Early Phase 1", "Phase 1", "Phase 1/Phase 2", "Phase 2", "Phase 2/Phase 3", "Phase 3")]
 # Failed Only
 clin <- clin[overall_status %in% c("Suspended", "Terminated", "Withdrawn")]
 # Select useful columns
@@ -64,7 +66,8 @@ clin$DrugBankIDs <- sapply(clin$drug_mesh, function(x) {
 })
 
 clin <- clin[!is.na(DrugBankIDs)]
-clin$DCNAME <- sapply(clin$DrugBankIDs, function(x) paste(drugcentral[DrugBankID %in% unlist(strsplit(x, '\\|'))]$name, collapse='|'))
+clin$DCNAME <- sapply(clin$DrugBankIDs, function(x) paste(drugcentral[DrugBankID %in% unlist(strsplit(x, '\\|')), first(name)], collapse='|'))
+# Delimited name count must match delimited DrugBankId count? Check?
 
 ## Add conditions
 clin$DISEASE_MESH <- sapply(clin$nct_id, function(x) {
