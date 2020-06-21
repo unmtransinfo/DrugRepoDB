@@ -14,7 +14,7 @@ load('data/repodb.RData')
 ## Status Summary Plotting
 #status_dt <- data.table(status = names(table(drug_dt$status)), count = as.integer(table(drug_dt$status)))
 status_dt <- drug_dt[, .(count = .N), by=status]
-N_DRUGS <- drug_dt[, uniqueN(drug_id)]
+N_DRUGS <- drug_dt[, uniqueN(drugbank_id)]
 N_INDS <- drug_dt[, uniqueN(ind_id)]
 
 #################
@@ -177,15 +177,15 @@ server <- function(input, output, session) {
     plot_ly(data=dcast(drug_dt[, .(count = .N), by=c("status", "sem_type")],
             type="bar", orientation="v", status ~ sem_type,  value.var = "count"),
             x=~status, y=~`Sign or Symptom`, name="Sign or Symptom") %>%
-      add_trace(y=~`Pathologic Function`, name="Pathologic Function") %>%
-      add_trace(y=~`Neoplastic Process`, name="Neoplastic Process") %>%
-      add_trace(y=~`Mental or Behavioral Dysfunction`, name="Mental or Behavioral Dysfunction") %>%
-      add_trace(y=~`Injury or Poisoning`, name="Injury or Poisoning") %>%
-      add_trace(y=~`Finding`, name="Finding") %>%
-      add_trace(y=~`Disease or Syndrome`, name="Disease or Syndrome") %>%
-      add_trace(y=~`Congenital Abnormality`, name="Congenital Abnormality") %>%
-      add_trace(y=~`Cell or Molecular Dysfunction`, name="Cell or Molecular Dysfunction") %>%
-      add_trace(y=~`Acquired Abnormality`, name="Acquired Abnormality") %>%
+      add_trace(type="bar", y=~`Pathologic Function`, name="Pathologic Function") %>%
+      add_trace(type="bar", y=~`Neoplastic Process`, name="Neoplastic Process") %>%
+      add_trace(type="bar", y=~`Mental or Behavioral Dysfunction`, name="Mental or Behavioral Dysfunction") %>%
+      add_trace(type="bar", y=~`Injury or Poisoning`, name="Injury or Poisoning") %>%
+      add_trace(type="bar", y=~`Finding`, name="Finding") %>%
+      add_trace(type="bar", y=~`Disease or Syndrome`, name="Disease or Syndrome") %>%
+      add_trace(type="bar", y=~`Congenital Abnormality`, name="Congenital Abnormality") %>%
+#      add_trace(type="bar", y=~`Cell or Molecular Dysfunction`, name="Cell or Molecular Dysfunction") %>%
+      add_trace(type="bar", y=~`Acquired Abnormality`, name="Acquired Abnormality") %>%
       layout(barmode="stack", xaxis=list(title="Trial Status"), yaxis=list(title="# of Trials"), 
              title="", font=list(family="Arial", size=12),
              legend=list(x=.8, y=1), margin=list(t=20, l=20, b=20, r=20))
@@ -242,7 +242,7 @@ server <- function(input, output, session) {
     filename = 'drugsearch.tsv',
     content = function(file) {
       drugtable <- subset(drug_dt, drug_name == input$drugdrop & status %in% input$drugcheck & (is.na(phase) | phase %in% input$phasecheckdrug),
-                select = c('drug_name','drug_id','ind_name','ind_id','NCT','status','phase','DetailedStatus'))
+                select = c('drug_name','drugbank_id','ind_name','ind_id','NCT','status','phase','DetailedStatus'))
       write.table(drugtable, file, sep='\t', row.names = F)
     }
   )
@@ -251,7 +251,7 @@ server <- function(input, output, session) {
     filename = 'diseasesearch.tsv',
     content = function(file) {
       indtable <- subset(drug_dt, ind_name == input$inddrop & status %in% input$drugcheck & (is.na(phase) | phase %in% input$phasecheckdrug),
-                select = c('drug_name','drug_id','ind_name','ind_id','NCT','status','phase','DetailedStatus'))
+                select = c('drug_name','drugbank_id','ind_name','ind_id','NCT','status','phase','DetailedStatus'))
       write.table(indtable, file, sep='\t', row.names = F)
     }
   )
@@ -260,7 +260,7 @@ server <- function(input, output, session) {
   output$downloadFull <- downloadHandler(
     filename = 'full.csv',
     content = function(file) {
-      table <- subset(drug_dt, select = c('drug_name','drug_id','ind_name','ind_id','NCT','status','phase','DetailedStatus'))
+      table <- subset(drug_dt, select = c('drug_name','drugbank_id','ind_name','ind_id','NCT','status','phase','DetailedStatus'))
       write.table(table, file, sep = ',', row.names = FALSE)
     }
   )

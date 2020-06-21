@@ -21,7 +21,7 @@ t0 <- proc.time()
 
 ## Build Indication Dictionary
 inddict <- data.table(raw=unlist(strsplit(drugcentral$DISEASE_MESH, '\\|')), cui=unlist(strsplit(drugcentral$DISEASE_UMLS, '\\|')), cuname=NA, semType=NA)
-inddict <- rbindlist(list(inddict, data.table(raw=unlist(strsplit(clin$DISEASE_MESH,'\\|')), cui=NA, cuname=NA, semType=NA)))
+inddict <- rbindlist(list(inddict, data.table(raw=unlist(strsplit(clin$DISEASE_MESH,'\\|')), cui=as.character(NA), cuname=as.character(NA), semType=as.character(NA))))
 inddict[, cui := ifelse(cui=='NA', NA, cui)]
 inddict <- inddict[!is.na(raw)]
 inddict <- unique(inddict)
@@ -32,16 +32,36 @@ for (i in 1:nrow(inddict)) {
     # If missing cui, attempt to fill
     if (is.na(inddict$cui[i])) {
         cuiL <- getCUI(raw, 'normalizedString', UMLS_VERSION, F)
-        if (length(cuiL) == 1 & cuiL[[1]][1] != 'NO_CONCEPT_MAPPED_TO') inddict[i, cui := cuiL[[1]][1]]
         # Don't allow multiple/no matches
-        else inddict[i, cui := NA]
+        if (length(cuiL) == 0) {
+          message(sprintf("No matches for: %s", raw))
+          inddict[i, cui := NA]
+          next
+        }
+        else if (length(cuiL) > 1) {
+          message(sprintf("Multiple matches for: %s (%s)", raw, paste(cuiL, collapse="|")))
+          inddict[i, cui := NA]
+          next
+        }
+        else if (cuiL[[1]][1] == 'NO_CONCEPT_MAPPED_TO') {
+          message(sprintf("NO_CONCEPT_MAPPED_TO: \"%s\"", raw))
+          inddict[i, cui := NA]
+          next
+        }
+        else {
+          cui_this <- cuiL[[1]][1]
+          # Confirm not NA
+          if (is.na(cui_this)) next
+          message(sprintf("Match for: \"%s\" -> %s", raw, cui_this))
+          inddict[i, cui := cui_this]
+          next
+        }
     }
-    # Once filled, check if still NA
-    if (is.na(inddict$cui[i])) next
-    else {
-        inddict[i, cuname := getName(cui)]
-        inddict[i, semType := getSemTyp(cui)]
-    }
+    cuname_this <- getName(inddict[i]$cui)
+    semtyp_this <- getSemTyp(inddict[i]$cui)
+    message(sprintf("cui=%s; cuname=%s; semtyp=%s", inddict[i, cui], cuname_this, semtyp_this))
+    inddict[i, cuname := cuname_this]
+    inddict[i, semType := semtyp_this]
 }
 inddict <- inddict[!is.na(cui) & !is.na(cuname)]
 inddict <- unique(inddict)
@@ -51,6 +71,7 @@ message(sprintf("%2d. %4d %s\n", 1:12, semType_counts[1:12, N], semType_counts[1
 inddict <- inddict[semType %in% c('Disease or Syndrome', 'Neoplastic Process', 'Pathologic Function', 'Finding', 'Mental or Behavioral Dysfunction',
                                           'Sign or Symptom', 'Injury or Poisoning', 'Congenital Abnormality', 'Acquired Abnormality',
                                           'Cell or Molecular Dysfunction')]
+# 'Cell or Molecular Dysfunction' still a thing?
 save(inddict, file='raw/indication_dictionary.RData')
 
 ## Build dataframe
@@ -65,10 +86,14 @@ for (i in 1:nrow(drugcentral)) {
     drugcomp <- sprintf('<a href="http://www.drugbank.ca/drugs/%s" target="_blank">%s (DBID: %s)</a>', dbid, dbid, drugname)
     
     # Indication Handling
-    if (is.na(drugcentral$DISEASE_MESH[i])) next
+    if (is.na(drugcentral$DISEASE_MESH[i])) {
+      next
+    }
     inds <- unlist(strsplit(drugcentral$DISEASE_MESH[i],'\\|'))
     indcus <- unname(unlist(sapply(inds, function(x) inddict[raw == x, cui] )))
-    if (length(indcus) == 0) next
+    if (length(indcus) == 0) {
+      next
+    }
     indcunames <- unname(unlist(sapply(inds, function(x) inddict[raw == x, cuname])))
     indtypes <- unname(unlist(sapply(inds, function(x) inddict[raw == x, semType])))
     indcomp <- paste0(indcunames, ' (CUI: ', indcus, ')')
@@ -105,14 +130,15 @@ for (i in 1:nrow(clin)) {
     # Indication Handling
     inds <- unlist(strsplit(clin$DISEASE_MESH[i], '\\|'))
     indcus <- unname(unlist(sapply(inds, function(x) inddict[raw == x, cui])))
-    if (length(indcus) == 0) next
+    if (length(indcus) == 0) {
+      next
+    }
     indcunames <- unname(unlist(sapply(inds, function(x) inddict[raw == x, cuname])))
     indtypes <- unname(unlist(sapply(inds, function(x) inddict[raw == x, semType])))
     indcomp <- paste0(indcunames, ' (CUI: ', indcus, ')')
 
     # Expand
     comp_dt_set <- expand.grid(c(1:length(drugcomp)), c(1:length(indcomp)))
-    setDT(comp_dt_set)
     comp_dt <- data.table(Drug = drugcomp[comp_dt_set$Var1], Indication = indcomp[comp_dt_set$Var2],
                          drug_name = drugnames[comp_dt_set$Var1], drugbank_id = dbids[comp_dt_set$Var1],
                          ind_name = indcunames[comp_dt_set$Var2], ind_id = indcus[comp_dt_set$Var2],
