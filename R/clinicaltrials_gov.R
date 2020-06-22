@@ -2,11 +2,13 @@
 # clinicaltrials_gov.R - Parse clinical trials information
 # 2016: Adam Brown; last Update: 11/16/16
 ##########################################################################
-# 2020: Repo forked, updated for DrugCentral-2020 and AACT snapshot.
+# 2020: Repo forked, updated for DrugCentral-2020 and AACT-20200201.
 # DrugBank maybe not available, nor needed.
 ##########################################################################
 library(readr)
 library(data.table)
+
+# drugcentral.R must be run before this code.
 
 ## Read
 #clin <- read.table('raw/AACT/clinical_study_noclob.txt', sep = '|', quote='"', header = T, fill = T, stringsAsFactors = F)
@@ -75,5 +77,9 @@ clin$DISEASE_MESH <- sapply(clin$nct_id, function(x) {
     out <- paste(slice, collapse = '|')
     return(out)
 })
+
+# Check for NCT01069861 (Terminated, for Sildenafil)
+message("NCT01069861 in dataset?...", ("NCT01069861" %in% clin$nct_id))
+print(clin[nct_id == "NCT01069861"])
 
 message("Done: (clinicaltrials_gov.R)")

@@ -4,18 +4,23 @@ library(DT)
 library(plotly)
 
 ## Options
-options(warn=-1)
+#options(warn=-1)
 
 ########
 # Load Data
 ##
 load('data/repodb.RData')
+#
+message(sprintf("Drugs (DBIDs): %d; Indications: %d; CTs: %d", drugs[, uniqueN(drugbank_id)], drugs[, uniqueN(ind_id)], drugs[, uniqueN(NCT)]))
+message(sprintf("Clinical trials (NCTIDs): %d; Terminated: %d; Withdrawn: %d; Suspended: %d; Approved: %d", drugs[, uniqueN(NCT)], drugs[status == "Terminated", uniqueN(NCT)], drugs[status == "Withdrawn", uniqueN(NCT)], drugs[status == "Suspended", uniqueN(NCT)], drugs[status == "Approved", uniqueN(NCT)]))
+
 
 ## Status Summary Plotting
-#status_dt <- data.table(status = names(table(drug_dt$status)), count = as.integer(table(drug_dt$status)))
-status_dt <- drug_dt[, .(count = .N), by=status]
-N_DRUGS <- drug_dt[, uniqueN(drugbank_id)]
-N_INDS <- drug_dt[, uniqueN(ind_id)]
+#status_dt <- data.table(status = names(table(drugs$status)), count = as.integer(table(drugs$status)))
+N_DRUGS <- drugs[, uniqueN(drugbank_id)]
+N_INDS <- drugs[, uniqueN(ind_id)]
+
+drugs[, status := factor(status, levels=c("Approved", "Suspended", "Terminated", "Withdrawn"), ordered=T)]
 
 #################
 # UI Definition #
@@ -160,7 +165,7 @@ ui <- fluidPage(
   p(strong('repoDB is intended for educational and scientific research purposes only.'),
     'This work is licensed under a ',
     a('Creative Commons Attribution 4.0 International License.', href="http://creativecommons.org/licenses/by/4.0/"),
-    'repoDB was developed by AS Brown and CJ Patel. See the "Citing repoDB" tab for citation information. In 2020, repoDB was updated with new versions of DrugCentral, AACT, and UMLS, in cooperation with Tudor Oprea and co-workers, developers of DrugCentral from the University of New Mexico Translational Informatics Division.',
+    'repoDB was developed by AS Brown and CJ Patel. See the "Citing repoDB" tab for citation information. In 2020, repoDB was updated with new versions of DrugCentral, AACT, and UMLS, in cooperation with Tudor Oprea and co-workers, developers of DrugCentral from the University of New Mexico.',
     'For more projects, visit the ', a('Patel Group Homepage.', href='http://www.chiragjpgroup.org/')
   )
 )
@@ -173,10 +178,12 @@ ui <- fluidPage(
 server <- function(input, output, session) {
 
   # Infographic definition
+  # "Approved", "Suspended", "Terminated", "Withdrawn"
   output$summary_plot <- renderPlotly({
-    plot_ly(data=dcast(drug_dt[, .(count = .N), by=c("status", "sem_type")],
-            type="bar", orientation="v", status ~ sem_type,  value.var = "count"),
-            x=~status, y=~`Sign or Symptom`, name="Sign or Symptom") %>%
+    status_counts <- drugs[, .(count = .N), by=status][order(status)]
+    pivot_data <- dcast(drugs[, .(count = .N), by=c("status", "sem_type")], status ~ sem_type,  value.var="count")
+    plot_ly(data=pivot_data,
+            type="bar", orientation="v", x=~status, y=~`Sign or Symptom`, name="Sign or Symptom") %>%
       add_trace(type="bar", y=~`Pathologic Function`, name="Pathologic Function") %>%
       add_trace(type="bar", y=~`Neoplastic Process`, name="Neoplastic Process") %>%
       add_trace(type="bar", y=~`Mental or Behavioral Dysfunction`, name="Mental or Behavioral Dysfunction") %>%
@@ -188,7 +195,8 @@ server <- function(input, output, session) {
       add_trace(type="bar", y=~`Acquired Abnormality`, name="Acquired Abnormality") %>%
       layout(barmode="stack", xaxis=list(title="Trial Status"), yaxis=list(title="# of Trials"), 
              title="", font=list(family="Arial", size=12),
-             legend=list(x=.8, y=1), margin=list(t=20, l=20, b=20, r=20))
+             legend=list(x=.8, y=1), margin=list(t=20, l=20, b=20, r=20)) %>%
+      add_annotations(text=status_counts[, count], x=0:(nrow(status_counts)-1), y=status_counts[, count]+200, showarrow=F)
   })
   
   # Dropmenu Definition
@@ -196,11 +204,11 @@ server <- function(input, output, session) {
     selectizeInput(
       inputId = 'drugdrop',
       label = 'Select a drug from the dropdown menu, or enter a search term:',
-      choices = sort(unique(drug_dt$drug_name)),
+      choices = sort(unique(drugs$drug_name)),
       selected = 'Sitagliptin',
       width = '100%',
       multiple = F,
-      options = list(maxOptions = length(unique(drug_dt$drug_name)))
+      options = list(maxOptions = length(unique(drugs$drug_name)))
     )
   })
   
@@ -208,23 +216,23 @@ server <- function(input, output, session) {
     selectizeInput(
       inputId = 'inddrop',
       label = 'Select an indication from the dropdown menu, or enter a search term:',
-      choices = sort(unique(drug_dt$ind_name)),
+      choices = sort(unique(drugs$ind_name)),
       selected = 'Diabetes Mellitus, Non-Insulin-Dependent',
       width = '100%', 
       multiple = F,
-      options = list(maxOptions = length(unique(drug_dt$ind_name)))
+      options = list(maxOptions = length(unique(drugs$ind_name)))
     )
   })
   
   # Reactive Datatable Subsetting
   drugreact <- reactive({
-    drugtable <- subset(drug_dt, drug_name == input$drugdrop & status %in% input$drugcheck & (is.na(phase) | phase %in% input$phasecheckdrug),
+    drugtable <- subset(drugs, drug_name == input$drugdrop & status %in% input$drugcheck & (is.na(phase) | phase %in% input$phasecheckdrug),
               select = c('Drug', 'Indication', 'TrialStatus', 'DetailedStatus'))
     return(drugtable)
   })
   
   indreact <- reactive({
-    indtable <- subset(drug_dt, ind_name == input$inddrop & status %in% input$indcheck & (is.na(phase) | phase %in% input$phasecheckind),
+    indtable <- subset(drugs, ind_name == input$inddrop & status %in% input$indcheck & (is.na(phase) | phase %in% input$phasecheckind),
               select = c('Drug', 'Indication', 'TrialStatus','DetailedStatus'))
     return(indtable)
   })
@@ -241,7 +249,7 @@ server <- function(input, output, session) {
   output$drugdownload <- downloadHandler(
     filename = 'drugsearch.tsv',
     content = function(file) {
-      drugtable <- subset(drug_dt, drug_name == input$drugdrop & status %in% input$drugcheck & (is.na(phase) | phase %in% input$phasecheckdrug),
+      drugtable <- subset(drugs, drug_name == input$drugdrop & status %in% input$drugcheck & (is.na(phase) | phase %in% input$phasecheckdrug),
                 select = c('drug_name','drugbank_id','ind_name','ind_id','NCT','status','phase','DetailedStatus'))
       write.table(drugtable, file, sep='\t', row.names = F)
     }
@@ -250,7 +258,7 @@ server <- function(input, output, session) {
   output$inddownload <- downloadHandler(
     filename = 'diseasesearch.tsv',
     content = function(file) {
-      indtable <- subset(drug_dt, ind_name == input$inddrop & status %in% input$drugcheck & (is.na(phase) | phase %in% input$phasecheckdrug),
+      indtable <- subset(drugs, ind_name == input$inddrop & status %in% input$drugcheck & (is.na(phase) | phase %in% input$phasecheckdrug),
                 select = c('drug_name','drugbank_id','ind_name','ind_id','NCT','status','phase','DetailedStatus'))
       write.table(indtable, file, sep='\t', row.names = F)
     }
@@ -260,7 +268,7 @@ server <- function(input, output, session) {
   output$downloadFull <- downloadHandler(
     filename = 'full.csv',
     content = function(file) {
-      table <- subset(drug_dt, select = c('drug_name','drugbank_id','ind_name','ind_id','NCT','status','phase','DetailedStatus'))
+      table <- subset(drugs, select = c('drug_name','drugbank_id','ind_name','ind_id','NCT','status','phase','DetailedStatus'))
       write.table(table, file, sep = ',', row.names = FALSE)
     }
   )

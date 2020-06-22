@@ -9,7 +9,8 @@ set -x
 #
 DBHOST="aact-db.ctti-clinicaltrials.org"
 DBPORT="5432"
-DBNAME="aact"
+DBNAME="aact_20200201"
+DBSCHEMA="ctgov"
 DBUSR="jjyang"
 
 ###
@@ -79,20 +80,53 @@ s.plan_to_share_ipd_description, \
 s.created_at, \
 s.updated_at"
 
-psql -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "COPY (SELECT $cols, i.id AS intervention_id, i.name AS drug_name FROM studies s JOIN interventions i ON i.nct_id = s.nct_id WHERE s.study_type = 'Interventional' AND i.intervention_type = 'Drug')  TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t')" |gzip -c >raw/AACT/studies.tsv.gz
+psql -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "\
+COPY (SELECT \
+	$cols, i.id AS intervention_id, \
+	i.name AS drug_name \
+FROM $DBSCHEMA.studies s \
+JOIN $DBSCHEMA.interventions i ON i.nct_id = s.nct_id \
+WHERE s.study_type = 'Interventional' AND i.intervention_type = 'Drug') \
+TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t') \
+" |gzip -c >raw/AACT/studies.tsv.gz
 
 ###
 # intervention_browse.txt
 # MESH_INTERVENTION_ID|NCT_ID|MESH_TERM
+# But what is MESH_INTERVENTION_ID? Methinks AACT table id.
 
-psql -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "COPY (SELECT bi.id AS browse_intervention_id, bi.nct_id, bi.mesh_term, i.name AS drug_name FROM browse_interventions bi JOIN interventions i ON i.nct_id = bi.nct_id WHERE i.intervention_type = 'Drug')  TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t')" |gzip -c >raw/AACT/intervention_browse.tsv.gz
+psql -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "\
+COPY (SELECT \
+	bi.id AS browse_intervention_id, \
+	bi.nct_id, \
+	bi.mesh_term, \
+	i.name AS drug_name, \
+	m.tree_number \
+FROM $DBSCHEMA.browse_interventions bi \
+JOIN $DBSCHEMA.interventions i ON i.nct_id = bi.nct_id \
+JOIN $DBSCHEMA.mesh_terms m ON bi.downcase_mesh_term = m.downcase_mesh_term \
+WHERE i.intervention_type = 'Drug') \
+TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t') \
+" |gzip -c >raw/AACT/intervention_browse.tsv.gz
 
 ###
 # condition_browse.txt ?? (Not in figshare zipfiles.)
-psql -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "COPY (SELECT nct_id, mesh_term FROM browse_conditions)  TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t')" |gzip -c >raw/AACT/condition_browse.tsv.gz
+psql -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "\
+COPY (SELECT \
+	nct_id, \
+	mesh_term \
+FROM $DBSCHEMA.browse_conditions) \
+TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t') \
+" |gzip -c >raw/AACT/condition_browse.tsv.gz
 
 ###
 # conditions.txt ?? (Not in figshare zipfiles.)
 # NCT_ID, CONDITION, ?
-psql -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "COPY (SELECT nct_id, name FROM conditions)  TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t')" |gzip -c >raw/AACT/conditions.tsv.gz
+psql -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "\
+COPY (SELECT \
+	nct_id, \
+	name \
+FROM $DBSCHEMA.conditions) \
+TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t') \
+" |gzip -c >raw/AACT/conditions.tsv.gz
 

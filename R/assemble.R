@@ -4,7 +4,7 @@
 # assemble.R - Prepare data for shiny app
 # 2016:  Adam Brown; last update 11/16/16
 ##########################################################################
-# 2020: Repo forked, updated for DrugCentral-2020 and AACT snapshot.
+# 2020: Repo forked, updated for DrugCentral-2020 and AACT-20200201.
 # DrugBank maybe not available, nor needed.
 ##########################################################################
 library(readr)
@@ -74,8 +74,10 @@ inddict <- inddict[semType %in% c('Disease or Syndrome', 'Neoplastic Process', '
 # 'Cell or Molecular Dysfunction' still a thing?
 save(inddict, file='raw/indication_dictionary.RData')
 
+stop("DEBUG")
+
 ## Build dataframe
-drug_dt <- data.table(Drug = character(), Indication = character(),
+drugs <- data.table(Drug = character(), Indication = character(),
                       drug_name = character(), drugbank_id = character(),
                       ind_name = character(), ind_id=character(),
                       sem_type = character())
@@ -103,14 +105,14 @@ for (i in 1:nrow(drugcentral)) {
                          drug_name = rep(drugname, length(indcomp)), drugbank_id = rep(dbid, length(indcomp)),
                          ind_name = indcunames, ind_id = indcus,
                          sem_type = indtypes)
-    drug_dt <- rbind(drug_dt, comp_dt)
+    drugs <- rbind(drugs, comp_dt)
 }
 
 # Add status = Approved, Placeholder for ExLink
-drug_dt[, TrialStatus := 'Approved']
-drug_dt[, status := 'Approved']
-drug_dt[, phase := NA]
-drug_dt[, DetailedStatus := NA]
+drugs[, TrialStatus := 'Approved']
+drugs[, status := 'Approved']
+drugs[, phase := NA]
+drugs[, DetailedStatus := NA]
 
 # Failed drugs from Clinical Trials
 failed <- data.table(Drug = character(), Indication = character(),
@@ -122,6 +124,8 @@ failed <- data.table(Drug = character(), Indication = character(),
                      phase = character(),
                      DetailedStatus = character())
 for (i in 1:nrow(clin)) {
+    #if (clin$nct_id[i] == "NCT01069861") stop("DEBUG...")
+  
     # Drug Handling
     drugnames <- unlist(strsplit(clin$DCNAME[i], '\\|'))
     dbids <- unlist(strsplit(clin$DrugBankIDs[i], '\\|'))
@@ -129,12 +133,14 @@ for (i in 1:nrow(clin)) {
 
     # Indication Handling
     inds <- unlist(strsplit(clin$DISEASE_MESH[i], '\\|'))
-    indcus <- unname(unlist(sapply(inds, function(x) inddict[raw == x, cui])))
+    indcus <- unname(unlist(sapply(inds, function(x) inddict[tolower(x) == tolower(raw), cui])))
+    #PROBLEM! NO CUI FOR: "PPHN", "Persistent Pulmonary Hypertension of the Newborn", "Hypoxic Respiratory Failure" 
+    
     if (length(indcus) == 0) {
       next
     }
-    indcunames <- unname(unlist(sapply(inds, function(x) inddict[raw == x, cuname])))
-    indtypes <- unname(unlist(sapply(inds, function(x) inddict[raw == x, semType])))
+    indcunames <- unname(unlist(sapply(inds, function(x) inddict[tolower(x) == tolower(raw), cuname])))
+    indtypes <- unname(unlist(sapply(inds, function(x) inddict[tolower(x) == tolower(raw), semType])))
     indcomp <- paste0(indcunames, ' (CUI: ', indcus, ')')
 
     # Expand
@@ -153,7 +159,7 @@ for (i in 1:nrow(clin)) {
     # Ensure uniqueness
     goodrows <- rep(NA, nrow(comp_dt))
     for (j in 1:nrow(comp_dt)) {
-        if (nrow(drug_dt[Drug == comp_dt$Drug[j] & Indication == comp_dt$Indication[j]]) == 0) goodrows[j] <- TRUE
+        if (nrow(drugs[Drug == comp_dt$Drug[j] & Indication == comp_dt$Indication[j]]) == 0) goodrows[j] <- TRUE
         else goodrows[j] <- FALSE
     }
     
@@ -162,15 +168,15 @@ for (i in 1:nrow(clin)) {
 }
 
 ## Combine
-drug_dt <- rbindlist(list(drug_dt, failed))
-drug_dt <- unique(drug_dt)
-drug_dt[, NCT := gsub('<a href="https://clinicaltrials.gov/ct2/show/|" target="_blank">.*|Approved', '', TrialStatus)]
-drug_dt[, NCT := ifelse(NCT == '', NA, NCT)]
+drugs <- rbindlist(list(drugs, failed))
+drugs <- unique(drugs)
+drugs[, NCT := gsub('<a href="https://clinicaltrials.gov/ct2/show/|" target="_blank">.*|Approved', '', TrialStatus)]
+drugs[, NCT := ifelse(NCT == '', NA, NCT)]
 
 ########
 # Save #
 ########
 
-save(drug_dt, file='R/repodb/data/repodb.RData')
+save(drugs, file='R/repodb/data/repodb.RData')
 #
 message(sprintf("%s, elapsed: %.1fs", Sys.time(), (proc.time()-t0)[3]))
