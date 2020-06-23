@@ -25,6 +25,9 @@ for (tag in colnames(clin)) {
   }
 }
 
+message("NCT00454714 in dataset?...", ("NCT00454714" %in% clin$nct_id)) # Check for NCT00454714 (Suspended, for Sildenafil)
+
+
 intven <- read_delim("raw/AACT/intervention_browse.tsv.gz", "\t", col_types = cols(.default=col_character()))
 setDT(intven)
 
@@ -34,6 +37,9 @@ setDT(cond)
 ## Pull good rows
 # NCTID consistent
 clin <- clin[grepl("^NCT", nct_id)]
+
+
+
 # Phase annotated
 # 2020: "Phase 0" nonexistent. "Early Phase 1" may be new name.
 #clin <- clin[phase %in% c("Phase 0", "Phase 1", "Phase 1/Phase 2", "Phase 2", "Phase 2/Phase 3", "Phase 3")]
@@ -55,6 +61,9 @@ clin$drug_mesh <- sapply(clin$nct_id, function(x) {
 })
 clin <- clin[!is.na(drug_mesh)]
 
+message("NCT00454714 in dataset?...", ("NCT00454714" %in% clin$nct_id)) # Check for NCT00454714 (Suspended, for Sildenafil)
+
+
 clin$DrugBankIDs <- sapply(clin$drug_mesh, function(x) {
     mesh <- unlist(strsplit(x, '\\|'))
     greplist <- rep(NA, length(mesh))
@@ -66,8 +75,11 @@ clin$DrugBankIDs <- sapply(clin$drug_mesh, function(x) {
     if (length(row) == 0) out <- NA
     else out <- paste(unique(drugcentral[row, DrugBankID]), collapse = '|')
 })
-
 clin <- clin[!is.na(DrugBankIDs)]
+
+message("NCT00454714 in dataset?...", ("NCT00454714" %in% clin$nct_id)) # Check for NCT00454714 (Suspended, for Sildenafil)
+
+
 clin$DCNAME <- sapply(clin$DrugBankIDs, function(x) paste(drugcentral[DrugBankID %in% unlist(strsplit(x, '\\|')), first(name)], collapse='|'))
 # Delimited name count must match delimited DrugBankId count? Check?
 
@@ -78,8 +90,10 @@ clin$DISEASE_MESH <- sapply(clin$nct_id, function(x) {
     return(out)
 })
 
-# Check for NCT01069861 (Terminated, for Sildenafil)
-message("NCT01069861 in dataset?...", ("NCT01069861" %in% clin$nct_id))
-print(clin[nct_id == "NCT01069861"])
+#message("NCT01069861 in dataset?...", ("NCT01069861" %in% clin$nct_id)) # Check for NCT01069861 (Terminated, for Sildenafil)
+#print(clin[nct_id == "NCT01069861"])
+
+message("NCT00454714 in dataset?...", ("NCT00454714" %in% clin$nct_id)) # Check for NCT00454714 (Suspended, for Sildenafil)
+
 
 message("Done: (clinicaltrials_gov.R)")

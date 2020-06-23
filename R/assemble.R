@@ -71,10 +71,11 @@ message(sprintf("%2d. %4d %s\n", 1:12, semType_counts[1:12, N], semType_counts[1
 inddict <- inddict[semType %in% c('Disease or Syndrome', 'Neoplastic Process', 'Pathologic Function', 'Finding', 'Mental or Behavioral Dysfunction',
                                           'Sign or Symptom', 'Injury or Poisoning', 'Congenital Abnormality', 'Acquired Abnormality',
                                           'Cell or Molecular Dysfunction')]
-# 'Cell or Molecular Dysfunction' still a thing?
+# 'Cell or Molecular Dysfunction' still a thing? Apparently no.
 save(inddict, file='raw/indication_dictionary.RData')
 
-stop("DEBUG")
+#load('raw/indication_dictionary.RData') #DEBUG
+#stop("DEBUG")
 
 ## Build dataframe
 drugs <- data.table(Drug = character(), Indication = character(),
@@ -92,12 +93,12 @@ for (i in 1:nrow(drugcentral)) {
       next
     }
     inds <- unlist(strsplit(drugcentral$DISEASE_MESH[i],'\\|'))
-    indcus <- unname(unlist(sapply(inds, function(x) inddict[raw == x, cui] )))
+    indcus <- unname(unlist(sapply(inds, function(x) inddict[tolower(raw) == tolower(x), cui] )))
     if (length(indcus) == 0) {
       next
     }
-    indcunames <- unname(unlist(sapply(inds, function(x) inddict[raw == x, cuname])))
-    indtypes <- unname(unlist(sapply(inds, function(x) inddict[raw == x, semType])))
+    indcunames <- unname(unlist(sapply(inds, function(x) inddict[tolower(raw) == tolower(x), cuname])))
+    indtypes <- unname(unlist(sapply(inds, function(x) inddict[tolower(raw) == tolower(x), semType])))
     indcomp <- paste0(indcunames, ' (CUI: ', indcus, ')')
 
     # Expand
@@ -124,7 +125,7 @@ failed <- data.table(Drug = character(), Indication = character(),
                      phase = character(),
                      DetailedStatus = character())
 for (i in 1:nrow(clin)) {
-    #if (clin$nct_id[i] == "NCT01069861") stop("DEBUG...")
+    if (clin$nct_id[i] == "NCT00454714") stop("DEBUG...")
   
     # Drug Handling
     drugnames <- unlist(strsplit(clin$DCNAME[i], '\\|'))
@@ -133,14 +134,14 @@ for (i in 1:nrow(clin)) {
 
     # Indication Handling
     inds <- unlist(strsplit(clin$DISEASE_MESH[i], '\\|'))
-    indcus <- unname(unlist(sapply(inds, function(x) inddict[tolower(x) == tolower(raw), cui])))
-    #PROBLEM! NO CUI FOR: "PPHN", "Persistent Pulmonary Hypertension of the Newborn", "Hypoxic Respiratory Failure" 
+    indcus <- unname(unlist(sapply(inds, function(x) inddict[tolower(raw) == tolower(x), cui])))
+    #PROBLEM! NO CUI FOR: "Coronary Vasospasm" https://meshb.nlm.nih.gov/record/ui?ui=D003329
     
     if (length(indcus) == 0) {
       next
     }
-    indcunames <- unname(unlist(sapply(inds, function(x) inddict[tolower(x) == tolower(raw), cuname])))
-    indtypes <- unname(unlist(sapply(inds, function(x) inddict[tolower(x) == tolower(raw), semType])))
+    indcunames <- unname(unlist(sapply(inds, function(x) inddict[tolower(raw) == tolower(x), cuname])))
+    indtypes <- unname(unlist(sapply(inds, function(x) inddict[tolower(raw) == tolower(x), semType])))
     indcomp <- paste0(indcunames, ' (CUI: ', indcus, ')')
 
     # Expand

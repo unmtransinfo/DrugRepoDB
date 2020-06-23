@@ -24,6 +24,8 @@ setDT(synonyms)
 #drugcentral <- subset(identifier, identifier %in% dbapproved$DrugBank.ID & id_type == 'DRUGBANK_ID', select = c('struct_id', 'identifier'))
 #drugcentral$name <- sapply(drugcentral$identifier, function(x) subset(dbapproved, DrugBank.ID == x)$Name)
 
+
+
 drugcentral <- identifier[id_type=="DRUGBANK_ID", .(struct_id, DrugBankID=identifier)]
 drugcentral <- merge(drugcentral, synonyms[preferred_name==1, .(id, name)], by.x="struct_id", by.y="id")
 

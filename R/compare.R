@@ -5,14 +5,18 @@ library(data.table)
 load('R/repodb/data/repodb.RData')
 
 # Old (2017) webapp data file:
-drug_old <- read_delim("../../Downloads/repodb_full_2017.csv", ",", col_types = cols(.default=col_character()))
-setDT(drug_old)
+drugs_old <- read_delim("../../Downloads/repodb_full_2017.csv", ",", col_types = cols(.default=col_character()))
+setDT(drugs_old)
 
-message(sprintf("New: Drugs (DBIDs): %d; Indications: %d", drug_dt[, uniqueN(drugbank_id)], drug_dt[, uniqueN(ind_id)]))
-message(sprintf("Old: Drugs (DBIDs): %d; Indications: %d", drug_old[, uniqueN(drug_id)], drug_old[, uniqueN(ind_id)]))
+message(sprintf("New: Drugs (DBIDs): %d; Indications: %d", drugs[, uniqueN(drugbank_id)], drugs[, uniqueN(ind_id)]))
+message(sprintf("Old: Drugs (DBIDs): %d; Indications: %d", drugs_old[, uniqueN(drug_id)], drugs_old[, uniqueN(ind_id)]))
 
-message(sprintf("New: Drug trials (NCT_IDs): %d; Terminated: %d; Withdrawn: %d; Suspended: %d; Approved: %d", drug_dt[, uniqueN(NCT)], drug_dt[status == "Terminated", uniqueN(NCT)], drug_dt[status == "Withdrawn", uniqueN(NCT)], drug_dt[status == "Suspended", uniqueN(NCT)], drug_dt[status == "Approved", uniqueN(NCT)]))
-message(sprintf("Old: Drug trials (NCT_IDs): %d; Terminated: %d; Withdrawn: %d; Suspended: %d; Approved: %d", drug_old[, uniqueN(NCT)], drug_old[status == "Terminated", uniqueN(NCT)], drug_old[status == "Withdrawn", uniqueN(NCT)], drug_old[status == "Suspended", uniqueN(NCT)], drug_old[status == "Approved", uniqueN(NCT)]))
+message(sprintf("New: Drug trials (NCT_IDs): %d; Terminated: %d; Withdrawn: %d; Suspended: %d; Approved: %d", drugs[, uniqueN(NCT)], drugs[status == "Terminated", uniqueN(NCT)], drugs[status == "Withdrawn", uniqueN(NCT)], drugs[status == "Suspended", uniqueN(NCT)], drugs[status == "Approved", uniqueN(NCT)]))
+message(sprintf("Old: Drug trials (NCT_IDs): %d; Terminated: %d; Withdrawn: %d; Suspended: %d; Approved: %d", drugs_old[, uniqueN(NCT)], drugs_old[status == "Terminated", uniqueN(NCT)], drugs_old[status == "Withdrawn", uniqueN(NCT)], drugs_old[status == "Suspended", uniqueN(NCT)], drugs_old[status == "Approved", uniqueN(NCT)]))
+
+message("NCT00454714 present in drugs?...", ("NCT00454714" %in% drugs$NCT))
+
+
 
 ###
 # New clinical trials raw file:
@@ -33,8 +37,14 @@ message(sprintf("New: Clinical trials (NCT_IDs): %d", clin[, uniqueN(nct_id)]))
 message(sprintf("Old: Clinical trials (NCT_IDs): %d", clin_old[, uniqueN(NCT_ID)]))
 
 # Check for NCT01069861 (Terminated, for Sildenafil)
-print(clin[nct_id == "NCT01069861"])
-print(clin_old[NCT_ID == "NCT01069861"])
+#print(clin[nct_id == "NCT01069861"])
+#print(clin_old[NCT_ID == "NCT01069861"])
+
+# Check for NCT01069861 (Suspended, for Sildenafil)
+message("NCT00454714 present in clin?...", ("NCT00454714" %in% clin$nct_id))
+print(clin[nct_id == "NCT00454714"])
+#print(clin_old[NCT_ID == "NCT00454714"])
+
 
 ###
 # New interventions raw file:
