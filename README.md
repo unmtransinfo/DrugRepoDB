@@ -30,3 +30,11 @@ Summary of 2020 update by Jeremy Yang of UNM.
 * Created new bash scripts to automate data extraction from DrugCentral and AACT, using psql/SQL.
 * Revised R code to rely on DrugCentral instead of DrugBank for approval status, but retaining DrugBank IDs.
 * Deployed provisionally at <http://unmtid-shinyapps.net/repodb/> for testing.
+
+## WORKFLOW
+
+1. [drugcentral.R](R/drugcentral.R)
+1. [clinicaltrials_gov.R](R/clinicaltrials_gov.R)
+1. [umls_query.R](R/umls_query.R)
+1. [assemble.R](R/assemble.R)
+

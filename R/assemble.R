@@ -11,9 +11,9 @@ library(readr)
 library(data.table)
 
 ## Scripts (order-dependent)
-source('R/drugcentral.R')
-source('R/clinicaltrials_gov.R')
-source('R/umls_query.R')
+# source('R/drugcentral.R')
+# source('R/clinicaltrials_gov.R')
+# source('R/umls_query.R')
 
 UMLS_VERSION <- "2020AA"  # In 2016 version was "2016AB".
 
@@ -125,7 +125,7 @@ failed <- data.table(Drug = character(), Indication = character(),
                      phase = character(),
                      DetailedStatus = character())
 for (i in 1:nrow(clin)) {
-    if (clin$nct_id[i] == "NCT00454714") stop("DEBUG...")
+    #if (clin$nct_id[i] == "NCT00454714") stop("DEBUG...")
   
     # Drug Handling
     drugnames <- unlist(strsplit(clin$DCNAME[i], '\\|'))

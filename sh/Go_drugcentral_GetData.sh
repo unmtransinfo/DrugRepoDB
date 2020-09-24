@@ -4,7 +4,7 @@
 
 set -x
 
-DBHOST="ec2-54-218-143-107.us-west-2.compute.amazonaws.com"
+DBHOST="unmtid-dbs.net"
 DBNAME="drugcentral"
 DBPORT="5433"
 DBUSR="drugman"
