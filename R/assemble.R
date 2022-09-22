@@ -15,7 +15,7 @@ library(data.table)
 # source('R/clinicaltrials_gov.R')
 # source('R/umls_query.R')
 
-UMLS_VERSION <- "2020AA"  # In 2016 version was "2016AB".
+UMLS_VERSION <- "2022AA"
 
 t0 <- proc.time()
 

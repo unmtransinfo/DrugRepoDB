@@ -7,6 +7,8 @@
 # 2020: Repo forked, updated for DrugCentral-2020 and AACT-20200201.
 # DrugBank maybe not available, nor needed.
 ##########################################################################
+# 2022: Updated for DrugCentral-20220822 and AACT-20220922.
+##########################################################################
 library(readr)
 library(data.table)
 
@@ -23,7 +25,6 @@ setDT(synonyms)
 ## DrugBank IDs
 #drugcentral <- subset(identifier, identifier %in% dbapproved$DrugBank.ID & id_type == 'DRUGBANK_ID', select = c('struct_id', 'identifier'))
 #drugcentral$name <- sapply(drugcentral$identifier, function(x) subset(dbapproved, DrugBank.ID == x)$Name)
-
 
 
 drugcentral <- identifier[id_type=="DRUGBANK_ID", .(struct_id, DrugBankID=identifier)]

@@ -5,6 +5,8 @@
 # 2020: Repo forked, updated for DrugCentral-2020 and AACT-20200201.
 # DrugBank maybe not available, nor needed.
 ##########################################################################
+# https://documentation.uts.nlm.nih.gov/rest/home.html
+##########################################################################
 library('httr')
 library('xml2')
 library("stringr")

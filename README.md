@@ -20,21 +20,33 @@ Drug repositioning, the process of discovering, validating, and marketing previo
 * [Adam S Brown, Chirag J Patel, A review of validation strategies for * computational drug repositioning, Briefings in Bioinformatics, Volume 19, Issue * 1, January 2018, Pages 174–177](https://doi.org/10.1093/bib/bbw110).
 * [repoDB: Antidote to an Unsatisfying Assumption, March 26, 2017](https://dbmi.hms.harvard.edu/news/repodb-antidote-unsatisfying-assumption).
 
-## UPDATE 
+## RELEASE NOTES 
 
-Summary of 2020 update by Jeremy Yang of UNM.
+Summary of 2022:
+
+* New version of DrugCentral, August 22, 2022.
+* New version of AACT, accessed September 2022.
+* New version of UMLS (2022AA, previously 2020AA).
+
+Summary of 2020 update:
 
 * New version of DrugCentral, May 16, 2020.
-* New version of UMLS (2020AA).
-* New version of CTTI AACT (live instance accessed June 2020).
+* New version of AACT, accessed June 2020.
+* New version of UMLS (2020AA, previously 2016AB).
 * Created new bash scripts to automate data extraction from DrugCentral and AACT, using psql/SQL.
 * Revised R code to rely on DrugCentral instead of DrugBank for approval status, but retaining DrugBank IDs.
-* Deployed provisionally at <http://unmtid-shinyapps.net/repodb/> for testing.
+* Deployed at <http://unmtid-shinyapps.net/repodb/>.
 
 ## WORKFLOW
 
-1. [drugcentral.R](R/drugcentral.R)
-1. [clinicaltrials_gov.R](R/clinicaltrials_gov.R)
-1. [umls_query.R](R/umls_query.R)
-1. [assemble.R](R/assemble.R)
+1. [Go\_drugcentral\_GetData.sh](sh/Go_drugcentral_GetData.sh)
+1. [Go\_aact\_GetData.sh](sh/Go_aact_GetData.sh)
+1. Execute in this order in same R environment:
+
+```
+source("R/drugcentral.R")
+source("R/clinicaltrials_gov.R")
+source("R/umls_query.R")
+source("R/assemble.R")
+```
 
