@@ -2,6 +2,7 @@ raw/
 *.Rproj
 .Rhistory
 **/*.RData
+*.log
 
 # Windows image file caches
 Thumbs.db
