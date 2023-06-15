@@ -9,7 +9,7 @@ library(plotly)
 ########
 # Load Data
 ##
-load('data/repodb.RData')
+load('repodb.RData')
 #
 message(sprintf("Drugs (DBIDs): %d; Indications: %d; CTs: %d", drugs[, uniqueN(drugbank_id)], drugs[, uniqueN(ind_id)], drugs[, uniqueN(NCT)]))
 message(sprintf("Clinical trials (NCTIDs): %d; Terminated: %d; Withdrawn: %d; Suspended: %d; Approved: %d", drugs[, uniqueN(NCT)], drugs[status == "Terminated", uniqueN(NCT)], drugs[status == "Withdrawn", uniqueN(NCT)], drugs[status == "Suspended", uniqueN(NCT)], drugs[status == "Approved", uniqueN(NCT)]))
@@ -40,9 +40,9 @@ ui <- fluidPage(
       p("repoDB contains a standard set of drug repositioning successes and failures that can be
        used to fairly and reproducibly benchmark computational repositioning methods. repoDB data
        was extracted from ", 
-       a('DrugCentral', href='http://drugcentral.org/'),
+       a('DrugCentral', href='https://drugcentral.org/'),
        "and ",
-       a('ClinicalTrials.gov.', href='http://clinicaltrials.gov')
+       a('ClinicalTrials.gov.', href='https://clinicaltrials.gov')
       ),
       
       p("The repoDB website has several functionalities, which can be accessed from the navigation bar:",
@@ -131,7 +131,7 @@ ui <- fluidPage(
       tags$br(),
       tags$br(),
       p("repoDB was built using the May 16, 2020 release of ",
-        a("DrugCentral,", href='http://drugcentral.org/download'),
+        a("DrugCentral,", href='https://drugcentral.org/download'),
         "the live version, accessed in June 2020, of the ",
         a("AACT database,", href='https://www.ctti-clinicaltrials.org/aact-database'),
         "and the 2020AA Release of the ",
@@ -141,7 +141,7 @@ ui <- fluidPage(
       ),
       p(strong("By using the repoDB database, users agree to cite our work, as well as AACT,
             DrugCentral, and UMLS for their role in data curation. This data is available under a ",
-            a('Creative Commons Attribution 4.0 International License.',href='https://creativecommons.org/licenses/by/4.0/')
+            a('Creative Commons Attribution 4.0 International License.', href='https://creativecommons.org/licenses/by/4.0/')
             )
       )
     ),
@@ -155,7 +155,8 @@ ui <- fluidPage(
         tags$li(strong('v1.2 (July 28, 2017)'), ' -', code('Version History'), ' tab was added to address discrepancies introduced in totals for Terminated
             Withdrawn, and Suspended drug-disease pairs versus published values due to bugfix in v1.1 (many thanks to Beste Turanli for
             spotting the discrepancy).'),
-        tags$li(strong('v2.0-SNAPSHOT (June 12, 2020)'), ' - Updated with new versions of DrugCentral, AACT and UMLS, in cooperation with developers of DrugCentral from the University of New Mexico.')
+        tags$li(strong('v2.0 (June 12, 2020)'), ' - Updated by Jeremy Yang at the University of New Mexico (UNM), with latest versions of DrugCentral, AACT and UMLS.'),
+        tags$li(strong('v2.1 (June 15, 2023)'), ' - Updated by Jeremy Yang (UNM), with latest versions of DrugCentral (2023-05-10), AACT (2023-06-14) and UMLS (2023AA).'),
       )
     )
   ),
@@ -165,8 +166,12 @@ ui <- fluidPage(
   p(strong('repoDB is intended for educational and scientific research purposes only.'),
     'This work is licensed under a ',
     a('Creative Commons Attribution 4.0 International License.', href="http://creativecommons.org/licenses/by/4.0/"),
-    'repoDB was developed by AS Brown and CJ Patel. See the "Citing repoDB" tab for citation information. In 2020, repoDB was updated with new versions of DrugCentral, AACT, and UMLS, in cooperation with Tudor Oprea and co-workers, developers of DrugCentral from the University of New Mexico.',
-    'For more projects, visit the ', a('Patel Group Homepage.', href='http://www.chiragjpgroup.org/')
+    'repoDB was originally developed  by AS Brown and CJ Patel, at the Harvard SoM ',
+    a("Patel Group", href="http://www.chiragjpgroup.org/"),
+    '. In 2020, repoDB was updated by Jeremy Yang from the University of New Mexico (UNM), SoM, DoIM, ',
+    a("Translational Informatics Division", href="https://datascience.unm.edu"),
+    ' in cooperation with the original developers, with new versions of DrugCentral, AACT, and UMLS.',
+    ' The 2023 update was also released by UNM.'
   )
 )
 

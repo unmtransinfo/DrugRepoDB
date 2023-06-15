@@ -10,13 +10,15 @@ library(data.table)
 
 # drugcentral.R must be run before this code.
 
+DATADIR <- paste0(Sys.getenv("HOME"), "/../data/DrugCentral/DrugRepoDB")
+
 ## Read
 #clin <- read.table('raw/AACT/clinical_study_noclob.txt', sep = '|', quote='"', header = T, fill = T, stringsAsFactors = F)
 #int <- read.table('raw/AACT/intervention_browse.txt', sep='|', header=T, fill=T, stringsAsFactors = F, quote='"')
 #cond <- fread('raw/AACT/condition_browse.txt', data.table = F)
 #cond <- rbind(fread('raw/AACT/conditions.txt', data.table = F))
 
-clin <- read_delim("raw/AACT/studies.tsv.gz", "\t", col_types=cols(.default=col_character()))
+clin <- read_delim(paste0(DATADIR, "/aact_studies.tsv.gz"), "\t", col_types=cols(.default=col_character()))
 setDT(clin)
 for (tag in colnames(clin)) {
   if (grepl("_(date|at)$", tag)) {
@@ -28,10 +30,10 @@ for (tag in colnames(clin)) {
 message("NCT00454714 in dataset?...", ("NCT00454714" %in% clin$nct_id)) # Check for NCT00454714 (Suspended, for Sildenafil)
 
 
-intven <- read_delim("raw/AACT/intervention_browse.tsv.gz", "\t", col_types = cols(.default=col_character()))
+intven <- read_delim(paste0(DATADIR, "/aact_intervention_browse.tsv.gz"), "\t", col_types = cols(.default=col_character()))
 setDT(intven)
 
-cond <- read_delim("raw/AACT/conditions.tsv.gz", "\t")
+cond <- read_delim(paste0(DATADIR, "/aact_conditions.tsv.gz"), "\t")
 setDT(cond)
 
 ## Pull good rows

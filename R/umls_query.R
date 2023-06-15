@@ -106,7 +106,7 @@ getCUI <- function(string, search_typ, version, verbose) {
     repeat {
         page <- (page+1)
         concepts_cnt <- length(concepts)
-        response <- GET(url=search_uri, query=list(string = string, ticket = getST(tgt, verbose), searchType=search_typ, pageNumber=page))
+        response <- GET(url=search_uri, query=list(string = URLencode(string), ticket = getST(tgt, verbose), searchType=search_typ, pageNumber=page))
         
         # no sleeping time neccessary of run at LHC
         # sleep_time <- round(runif(1, 0.015, 0.025), digits = 3) # random sleep of 10-25ms
@@ -130,8 +130,12 @@ getCUI <- function(string, search_typ, version, verbose) {
         else
         {
             Res <- content(response, encoding="UTF-8")
+            #message(sprintf("DEBUG: length(Res$result$results): %d", length(Res$result$results)))
+            if (length(Res$result$results)==0) {
+              break
+            }
             for (i in 1:length(Res$result$results)) {
-                concepts[[concepts_cnt+i]] <- c(Res$result$results[[i]]$ui,
+                  concepts[[concepts_cnt+i]] <- c(Res$result$results[[i]]$ui,
                                                 Res$result$results[[i]]$name,
                                                 Res$result$results[[i]]$rootSource,
                                                 Res$result$results[[i]]$uri)

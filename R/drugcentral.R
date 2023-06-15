@@ -12,12 +12,14 @@
 library(readr)
 library(data.table)
 
+DATADIR <- paste0(Sys.getenv("HOME"), "/../data/DrugCentral/DrugRepoDB")
+
 ## Read
-identifier <- read_delim("raw/DrugCentral/identifier.tsv", "\t", col_types = cols(.default = col_character(), parent_match=col_logical()))
+identifier <- read_delim(paste0(DATADIR, "/drugcentral_identifier.tsv"), "\t", col_types = cols(.default = col_character(), parent_match=col_logical()))
 setDT(identifier)
-indication <- read_delim("raw/DrugCentral/omop_relationship.tsv", "\t", col_types = cols(.default = col_character()))
+indication <- read_delim(paste0(DATADIR, "/drugcentral_omop_relationship.tsv"), "\t", col_types = cols(.default = col_character()))
 setDT(indication)
-synonyms <- read_delim("raw/DrugCentral/synonyms.tsv", "\t", col_types = cols(.default = col_character()))
+synonyms <- read_delim(paste0(DATADIR, "/drugcentral_synonyms.tsv"), "\t", col_types = cols(.default = col_character()))
 setDT(synonyms)
 # DrugBank not needed for approval status. Keep DrugBank IDs. Use DrugCentral preferred_name.
 #dbapproved <- read_delim('raw/DrugBank/drug_links.csv', sep=',',quote='"',header=T,stringsAsFactors = F)

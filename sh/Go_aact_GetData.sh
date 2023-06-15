@@ -6,8 +6,6 @@
 
 # Database content refreshed daily according to website. 
 
-set -x
-
 #
 DBHOST="aact-db.ctti-clinicaltrials.org"
 DBPORT="5432"
@@ -17,6 +15,12 @@ DBUSR="jjyang"
 
 cwd=$(pwd)
 
+DATADIR="$(cd $HOME/../data/DrugCentral/DrugRepoDB; pwd)"
+
+if [ ! -e "$DATADIR" ]; then
+	printf "DATADIR not found: ${DATADIR}\n"
+	exit
+fi
 
 ###
 # clinical_study_noclob.txt
@@ -93,7 +97,7 @@ FROM $DBSCHEMA.studies s \
 JOIN $DBSCHEMA.interventions i ON i.nct_id = s.nct_id \
 WHERE s.study_type = 'Interventional' AND i.intervention_type = 'Drug') \
 TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t') \
-" |gzip -c >${cwd}/raw/AACT/studies.tsv.gz
+" |gzip -c >${DATADIR}/aact_studies.tsv.gz
 
 ###
 # intervention_browse.txt
@@ -112,7 +116,7 @@ JOIN $DBSCHEMA.interventions i ON i.nct_id = bi.nct_id \
 JOIN $DBSCHEMA.mesh_terms m ON bi.downcase_mesh_term = m.downcase_mesh_term \
 WHERE i.intervention_type = 'Drug') \
 TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t') \
-" |gzip -c >${cwd}/raw/AACT/intervention_browse.tsv.gz
+" |gzip -c >${DATADIR}/aact_intervention_browse.tsv.gz
 
 ###
 # condition_browse.txt ?? (Not in figshare zipfiles.)
@@ -122,7 +126,7 @@ COPY (SELECT \
 	mesh_term \
 FROM $DBSCHEMA.browse_conditions) \
 TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t') \
-" |gzip -c >${cwd}/raw/AACT/condition_browse.tsv.gz
+" |gzip -c >${DATADIR}/aact_condition_browse.tsv.gz
 
 ###
 # conditions.txt ?? (Not in figshare zipfiles.)
@@ -133,7 +137,7 @@ COPY (SELECT \
 	name \
 FROM $DBSCHEMA.conditions) \
 TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t') \
-" |gzip -c >${cwd}/raw/AACT/conditions.tsv.gz
+" |gzip -c >${DATADIR}/aact_conditions.tsv.gz
 
 ###
-printf "$(date +'%Y-%m-%d-%H:%M:%S')\n" >${cwd}/raw/AACT/aact_timestamp.txt
+printf "$(date +'%Y-%m-%d-%H:%M:%S')\n" >${DATADIR}/aact_timestamp.txt
