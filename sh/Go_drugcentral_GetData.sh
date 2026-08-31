@@ -12,23 +12,33 @@ DBUSR="drugman"
 
 cwd=$(pwd)
 
-DATADIR="$(cd $HOME/../data/DrugCentral/DrugRepoDB; pwd)"
+DATADIR="$(cd $HOME/../data/DrugCentral/DrugRepoDb; pwd)"
 
 if [ ! -e "$DATADIR" ]; then
 	printf "DATADIR not found: ${DATADIR}\n"
 	exit
 fi
+###
+if [ "`uname -s`" = "Darwin" ]; then
+	PSQL="/Library/PostgreSQL/18/bin/psql"
+else
+	PSQL="$(which psql)"
+fi
+printf "PSQL: ${PSQL}\n"
+#
+
+set -x
 
 ###
 # identifier.csv
 # "id", "identifier", "id_type", "struct_id", "parent_match"
-psql -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "COPY (SELECT * FROM identifier) TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t')" >${DATADIR}/drugcentral_identifier.tsv
+$PSQL -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "COPY (SELECT * FROM identifier) TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t')" >${DATADIR}/drugcentral_identifier.tsv
 #
 ###
 # synonyms.csv
 # "syn_id", "id", "name", "preferred_name", "parent_id", "lname"
-psql -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "COPY (SELECT * FROM synonyms) TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t')" >${DATADIR}/drugcentral_synonyms.tsv
+$PSQL -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "COPY (SELECT * FROM synonyms) TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t')" >${DATADIR}/drugcentral_synonyms.tsv
 ###
 # omop_relationship.csv
 # "id", "struct_id", "concept_id", "relationship_name", "concept_name", "umls_cui", "snomed_full_name", "cui_semantic_type", "snomed_conceptid"
-psql -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "COPY (SELECT * FROM omop_relationship) TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t')" >${DATADIR}/drugcentral_omop_relationship.tsv
+$PSQL -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "COPY (SELECT * FROM omop_relationship) TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t')" >${DATADIR}/drugcentral_omop_relationship.tsv

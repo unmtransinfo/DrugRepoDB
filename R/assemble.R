@@ -21,9 +21,9 @@ if (!exists("getCUI")) {
   source('R/umls_query.R')
 }
 
-UMLS_VERSION <- "2023AA"
+UMLS_VERSION <- "2026AA"
 
-DATADIR <- paste0(Sys.getenv("HOME"), "/../data/DrugCentral/DrugRepoDB")
+DATADIR <- paste0(Sys.getenv("HOME"), "/../data/DrugCentral/DrugRepoDb")
 
 t0 <- proc.time()
 

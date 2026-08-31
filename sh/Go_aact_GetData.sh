@@ -12,10 +12,11 @@ DBPORT="5432"
 DBNAME="aact"
 DBSCHEMA="ctgov"
 DBUSR="jjyang"
+# DBPW from $HOME/.pgpass
 
 cwd=$(pwd)
 
-DATADIR="$(cd $HOME/../data/DrugCentral/DrugRepoDB; pwd)"
+DATADIR="$(cd $HOME/../data/DrugCentral/DrugRepoDb; pwd)"
 
 if [ ! -e "$DATADIR" ]; then
 	printf "DATADIR not found: ${DATADIR}\n"
@@ -23,121 +24,46 @@ if [ ! -e "$DATADIR" ]; then
 fi
 
 ###
+if [ "`uname -s`" = "Darwin" ]; then
+	PSQL="/Library/PostgreSQL/18/bin/psql"
+else
+	PSQL="$(which psql)"
+fi
+printf "PSQL: ${PSQL}\n"
+#
+###
 # clinical_study_noclob.txt
 # NCT_ID|DOWNLOAD_DATE|DOWNLOAD_DATE_DT|ORG_STUDY_ID|BRIEF_TITLE|OFFICIAL_TITLE|ACRONYM|SOURCE|HAS_DMC|OVERALL_STATUS|START_DATE|COMPLETION_DATE|COMPLETION_DATE_TYPE|PRIMARY_COMPLETION_DATE|PRIMARY_COMPLETION_DATE_TYPE|PHASE|STUDY_TYPE|STUDY_DESIGN|NUMBER_OF_ARMS|NUMBER_OF_GROUPS|ENROLLMENT_TYPE|ENROLLMENT|BIOSPEC_RETENTION|BIOSPEC_DESCR|GENDER|MINIMUM_AGE|MAXIMUM_AGE|HEALTHY_VOLUNTEERS|SAMPLING_METHOD|STUDY_POP|VERIFICATION_DATE|LASTCHANGED_DATE|FIRSTRECEIVED_DATE|IS_SECTION_801|IS_FDA_REGULATED|WHY_STOPPED|HAS_EXPANDED_ACCESS|FIRSTRECEIVED_RESULTS_DATE|URL|TARGET_DURATION|STUDY_RANK|LIMITATIONS_AND_CAVEATS
 
 #
-cols="\
-s.nct_id, \
-s.nlm_download_date_description, \
-s.study_first_submitted_date, \
-s.results_first_submitted_date, \
-s.disposition_first_submitted_date, \
-s.last_update_submitted_date, \
-s.study_first_submitted_qc_date, \
-s.study_first_posted_date, \
-s.study_first_posted_date_type, \
-s.results_first_submitted_qc_date, \
-s.results_first_posted_date, \
-s.results_first_posted_date_type, \
-s.disposition_first_submitted_qc_date, \
-s.disposition_first_posted_date, \
-s.disposition_first_posted_date_type, \
-s.last_update_submitted_qc_date, \
-s.last_update_posted_date, \
-s.last_update_posted_date_type, \
-s.start_date_type, \
-s.start_date, \
-s.verification_date, \
-s.completion_date_type, \
-s.completion_date, \
-s.primary_completion_date_type, \
-s.primary_completion_date, \
-s.target_duration, \
-s.study_type, \
-s.acronym, \
-s.baseline_population, \
-s.brief_title, \
-s.official_title, \
-s.overall_status, \
-s.last_known_status, \
-s.phase, \
-s.enrollment, \
-s.enrollment_type, \
-s.source, \
-s.limitations_and_caveats, \
-s.number_of_arms, \
-s.number_of_groups, \
-s.biospec_retention, \
-s.biospec_description, \
-s.why_stopped, \
-s.has_expanded_access, \
-s.expanded_access_type_individual, \
-s.expanded_access_type_intermediate, \
-s.expanded_access_type_treatment, \
-s.has_dmc, \
-s.is_fda_regulated_drug, \
-s.is_fda_regulated_device, \
-s.is_unapproved_device, \
-s.is_ppsd, \
-s.is_us_export, \
-s.ipd_time_frame, \
-s.ipd_access_criteria, \
-s.ipd_url, \
-s.plan_to_share_ipd, \
-s.plan_to_share_ipd_description, \
-s.created_at, \
-s.updated_at"
+#
 
-psql -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "\
-COPY (SELECT \
-	$cols, i.id AS intervention_id, \
-	i.name AS drug_name \
-FROM $DBSCHEMA.studies s \
-JOIN $DBSCHEMA.interventions i ON i.nct_id = s.nct_id \
-WHERE s.study_type = 'Interventional' AND i.intervention_type = 'Drug') \
-TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t') \
-" |gzip -c >${DATADIR}/aact_studies.tsv.gz
+set -x
+
+#
+$PSQL -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR \
+	-f ${cwd}/sql/aact_studies.sql \
+	|gzip -c >${DATADIR}/aact_studies.tsv.gz
 
 ###
 # intervention_browse.txt
 # MESH_INTERVENTION_ID|NCT_ID|MESH_TERM
 # But what is MESH_INTERVENTION_ID? Methinks AACT table id.
 
-psql -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "\
-COPY (SELECT \
-	bi.id AS browse_intervention_id, \
-	bi.nct_id, \
-	bi.mesh_term, \
-	i.name AS drug_name, \
-	m.tree_number \
-FROM $DBSCHEMA.browse_interventions bi \
-JOIN $DBSCHEMA.interventions i ON i.nct_id = bi.nct_id \
-JOIN $DBSCHEMA.mesh_terms m ON bi.downcase_mesh_term = m.downcase_mesh_term \
-WHERE i.intervention_type = 'Drug') \
-TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t') \
-" |gzip -c >${DATADIR}/aact_intervention_browse.tsv.gz
-
+$PSQL -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR \
+	-f ${cwd}/sql/aact_intervention_browse.sql \
+	|gzip -c >${DATADIR}/aact_intervention_browse.tsv.gz
 ###
 # condition_browse.txt ?? (Not in figshare zipfiles.)
-psql -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "\
-COPY (SELECT \
-	nct_id, \
-	mesh_term \
-FROM $DBSCHEMA.browse_conditions) \
-TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t') \
-" |gzip -c >${DATADIR}/aact_condition_browse.tsv.gz
-
+$PSQL -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR \
+	-f ${cwd}/sql/aact_condition_browse.sql \
+	|gzip -c >${DATADIR}/aact_condition_browse.tsv.gz
 ###
 # conditions.txt ?? (Not in figshare zipfiles.)
 # NCT_ID, CONDITION, ?
-psql -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "\
-COPY (SELECT \
-	nct_id, \
-	name \
-FROM $DBSCHEMA.conditions) \
-TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t') \
-" |gzip -c >${DATADIR}/aact_conditions.tsv.gz
+$PSQL -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR \
+	-f ${cwd}/sql/aact_conditions.sql \
+	|gzip -c >${DATADIR}/aact_conditions.tsv.gz
 
 ###
 printf "$(date +'%Y-%m-%d-%H:%M:%S')\n" >${DATADIR}/aact_timestamp.txt

@@ -12,7 +12,7 @@
 library(readr)
 library(data.table)
 
-DATADIR <- paste0(Sys.getenv("HOME"), "/../data/DrugCentral/DrugRepoDB")
+DATADIR <- paste0(Sys.getenv("HOME"), "/../data/DrugCentral/DrugRepoDb")
 
 ## Read
 identifier <- read_delim(paste0(DATADIR, "/drugcentral_identifier.tsv"), "\t", col_types = cols(.default = col_character(), parent_match=col_logical()))

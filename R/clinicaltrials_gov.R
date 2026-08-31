@@ -10,7 +10,7 @@ library(data.table)
 
 # drugcentral.R must be run before this code.
 
-DATADIR <- paste0(Sys.getenv("HOME"), "/../data/DrugCentral/DrugRepoDB")
+DATADIR <- paste0(Sys.getenv("HOME"), "/../data/DrugCentral/DrugRepoDb")
 
 ## Read
 #clin <- read.table('raw/AACT/clinical_study_noclob.txt', sep = '|', quote='"', header = T, fill = T, stringsAsFactors = F)
@@ -43,11 +43,17 @@ clin <- clin[grepl("^NCT", nct_id)]
 
 
 # Phase annotated
+table(clin$phase)
+
 # 2020: "Phase 0" nonexistent. "Early Phase 1" may be new name.
 #clin <- clin[phase %in% c("Phase 0", "Phase 1", "Phase 1/Phase 2", "Phase 2", "Phase 2/Phase 3", "Phase 3")]
-clin <- clin[phase %in% c("Phase 0", "Early Phase 1", "Phase 1", "Phase 1/Phase 2", "Phase 2", "Phase 2/Phase 3", "Phase 3")]
+#clin <- clin[phase %in% c("Phase 0", "Early Phase 1", "Phase 1", "Phase 1/Phase 2", "Phase 2", "Phase 2/Phase 3", "Phase 3")]
+clin <- clin[phase %in% c("EARLY_PHASE1", "PHASE1", "PHASE1/PHASE2", "PHASE2", "PHASE2/PHASE3", "PHASE3", "PHASE4")]
+
 # Failed Only
-clin <- clin[overall_status %in% c("Suspended", "Terminated", "Withdrawn")]
+#clin <- clin[overall_status %in% c("Suspended", "Terminated", "Withdrawn")]
+clin <- clin[overall_status %in% c("SUSPENDED", "TERMINATED", "WITHDRAWN")]
+
 # Select useful columns
 clin <- clin[, .(nct_id, phase, overall_status, why_stopped)]
 
