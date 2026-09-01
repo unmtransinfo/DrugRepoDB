@@ -27,7 +27,7 @@ drugs[, status := factor(status, levels=c("Approved", "Suspended", "Terminated",
 #################
 ui <- fluidPage(
   ## Header
-  headerPanel(tags$head(tags$img(src="logo.png", height="80px", width='275px', style = "padding-left: 25px; padding-top: 15px")),
+  headerPanel(tags$head(tags$img(src="DrugRepoDbLogo.png", height="80px", width='275px', style = "padding-left: 25px; padding-top: 15px")),
         windowTitle="DrugRepoDd: Drug Repositioning Database"),
   
   tags$br(),
