@@ -191,6 +191,6 @@ drugs[, NCT := ifelse(NCT == '', NA, NCT)]
 # Save #
 ########
 
-save(drugs, file='R/repodb/repodb.RData')
+save(drugs, file='R/drugrepodb/drugrepodb.RData')
 #
 message(sprintf("%s, elapsed: %.1fs", Sys.time(), (proc.time()-t0)[3]))

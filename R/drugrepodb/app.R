@@ -9,7 +9,7 @@ library(plotly)
 ########
 # Load Data
 ##
-load('repodb.RData')
+load('drugrepodb.RData')
 #
 message(sprintf("Drugs (DBIDs): %d; Indications: %d; CTs: %d", drugs[, uniqueN(drugbank_id)], drugs[, uniqueN(ind_id)], drugs[, uniqueN(NCT)]))
 message(sprintf("Clinical trials (NCTIDs): %d; Terminated: %d; Withdrawn: %d; Suspended: %d; Approved: %d", drugs[, uniqueN(NCT)], drugs[status == "Terminated", uniqueN(NCT)], drugs[status == "Withdrawn", uniqueN(NCT)], drugs[status == "Suspended", uniqueN(NCT)], drugs[status == "Approved", uniqueN(NCT)]))
@@ -28,7 +28,7 @@ drugs[, status := factor(status, levels=c("Approved", "Suspended", "Terminated",
 ui <- fluidPage(
   ## Header
   headerPanel(tags$head(tags$img(src="logo.png", height="80px", width='275px', style = "padding-left: 25px; padding-top: 15px")),
-        windowTitle="repoDB: Drug Repositioning Database"),
+        windowTitle="DrugRepoDd: Drug Repositioning Database"),
   
   tags$br(),
   
@@ -37,15 +37,15 @@ ui <- fluidPage(
     ## Overview Panel
     tabPanel(
       "Introduction",
-      p("repoDB contains a standard set of drug repositioning successes and failures that can be
-       used to fairly and reproducibly benchmark computational repositioning methods. repoDB data
+      p("DrugRepoDb contains a standard set of drug repositioning successes and failures that can be
+       used to fairly and reproducibly benchmark computational repositioning methods. DrugRepoDb data
        was extracted from ", 
        a('DrugCentral', href='https://drugcentral.org/'),
        "and ",
        a('ClinicalTrials.gov.', href='https://clinicaltrials.gov')
       ),
       
-      p("The repoDB website has several functionalities, which can be accessed from the navigation bar:",
+      p("The DrugRepoDb website has several functionalities, which can be accessed from the navigation bar:",
        tags$ul(
          tags$li("Drug-centric searching"),
          tags$li("Disease-centric searching"),
@@ -53,15 +53,15 @@ ui <- fluidPage(
        )
       ),
       
-      p("You can explore the types and characteristics of data in repoDB in the plot below."),
+      p("You can explore the types and characteristics of data in DrugRepoDb in the plot below."),
       plotlyOutput("summary_plot")
     ),
     
     ## Drug Search Panel
     tabPanel(
       "Drug Search",
-      p(sprintf('repoDB contains information about %d currently approved drugs (as curated by DrugCentral).
-        To search repoDB for a specific drug, select a drug and the current statuses you\'d like to display.
+      p(sprintf('DrugRepoDb contains information about %d currently approved drugs (as curated by DrugCentral).
+        To search DrugRepoDb for a specific drug, select a drug and the current statuses you\'d like to display.
         Drugs are listed with their DrugCentral and DrugBank IDs, for easier integration into your existing pipelines.
         Search results can be downloaded as a tab-separated values file using the download button below the table
         of drug indications.', N_DRUGS)
@@ -88,7 +88,7 @@ ui <- fluidPage(
     ),
     tabPanel(
       "Disease Search",
-      p(sprintf('repoDB contains information about %d diseases (indications), all mapped to UMLS terms for easier 
+      p(sprintf('DrugRepoDb contains information about %d diseases (indications), all mapped to UMLS terms for easier 
         integration into your existing pipelines. To search for a specific disease,
         select a disease and the current statuses you\'d like to display.
         Search results can be downloaded as a tab-separated values file using the download button below the table
@@ -116,7 +116,7 @@ ui <- fluidPage(
     ),
     tabPanel(
       "Download",
-      p("The full repoDB database is available for download using the button below.
+      p("The full DrugRepoDb database is available for download using the button below.
        Please note that the data is presented as-is, and not all entries have been
        validated before publication."),
       downloadButton(
@@ -125,12 +125,12 @@ ui <- fluidPage(
       )
     ),
     tabPanel(
-      "Citing repoDB",
-      p("To acknowledge use of the repoDB resource, please cite the following paper:" ),
+      "Citing DrugRepoDb",
+      p("To acknowledge use of the DrugRepoDb resource, please cite the following paper:" ),
       tags$code( "Brown AS and Patel CJ. repoDB: A New Standard for Drug Repositioning Validation.", em("Scientific Data."), "170029 (2017)."),
       tags$br(),
       tags$br(),
-      p("repoDB was built using the May 16, 2020 release of ",
+      p("DrugRepoDb was built using the May 16, 2020 release of ",
         a("DrugCentral,", href='https://drugcentral.org/download'),
         "the live version, accessed in June 2020, of the ",
         a("AACT database,", href='https://www.ctti-clinicaltrials.org/aact-database'),
@@ -139,7 +139,7 @@ ui <- fluidPage(
         "Metformin and recycling symbol used under CC0 license from wikimedia commons. Database symbol by Designmodo,
         used under a CC3.0 license."
       ),
-      p(strong("By using the repoDB database, users agree to cite our work, as well as AACT,
+      p(strong("By using the DrugRepoDb database, users agree to cite our work, as well as AACT,
             DrugCentral, and UMLS for their role in data curation. This data is available under a ",
             a('Creative Commons Attribution 4.0 International License.', href='https://creativecommons.org/licenses/by/4.0/')
             )
@@ -147,7 +147,7 @@ ui <- fluidPage(
     ),
     tabPanel(
       "Version History",
-      p("As repoDB is improved and augmented with new data, we will track any substantial changes made to repoDB here:"),
+      p("As DrugRepoDb is improved and augmented with new data, we will track any substantial changes made to DrugRepoDb here:"),
       tags$ul(
         tags$li(strong('v1.0 (March 14, 2017)'), ' - Initial release'),
         tags$li(strong('v1.1 (June 26, 2017)'), ' - Fixed a bug in the ClinicalTrials.gov parser that created multiple DrugBank Identifiers for a
@@ -163,12 +163,12 @@ ui <- fluidPage(
 
   ## Footer
   tags$hr(),
-  p(strong('repoDB is intended for educational and scientific research purposes only.'),
+  p(strong('DrugRepoDb is intended for educational and scientific research purposes only.'),
     'This work is licensed under a ',
     a('Creative Commons Attribution 4.0 International License.', href="http://creativecommons.org/licenses/by/4.0/"),
-    'repoDB was originally developed  by AS Brown and CJ Patel, at the Harvard SoM ',
+    'DrugRepoDb was originally developed  by AS Brown and CJ Patel, at the Harvard SoM ',
     a("Patel Group", href="http://www.chiragjpgroup.org/"),
-    '. In 2020, repoDB was updated by Jeremy Yang from the University of New Mexico (UNM), SoM, DoIM, ',
+    '. In 2020, DrugRepoDb was updated by Jeremy Yang from the University of New Mexico (UNM), SoM, DoIM, ',
     a("Translational Informatics Division", href="https://datascience.unm.edu"),
     ' in cooperation with the original developers, with new versions of DrugCentral, AACT, and UMLS.',
     ' The 2023 update was also released by UNM.'
