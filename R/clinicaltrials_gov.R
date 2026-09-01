@@ -12,6 +12,8 @@ library(data.table)
 
 DATADIR <- paste0(Sys.getenv("HOME"), "/../data/DrugCentral/DrugRepoDb")
 
+t_start <- Sys.time()
+
 ## Read
 #clin <- read.table('raw/AACT/clinical_study_noclob.txt', sep = '|', quote='"', header = T, fill = T, stringsAsFactors = F)
 #int <- read.table('raw/AACT/intervention_browse.txt', sep='|', header=T, fill=T, stringsAsFactors = F, quote='"')
@@ -104,4 +106,6 @@ clin$DISEASE_MESH <- sapply(clin$nct_id, function(x) {
 message("NCT00454714 in dataset?...", ("NCT00454714" %in% clin$nct_id)) # Check for NCT00454714 (Suspended, for Sildenafil)
 
 
+t_elapsed <- (Sys.time()-t_start)
+message(sprintf("Elapsed time: %.2f %s", t_elapsed, attr(t_elapsed, "units")))
 message("Done: (clinicaltrials_gov.R)")

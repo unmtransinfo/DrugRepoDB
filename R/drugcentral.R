@@ -14,6 +14,8 @@ library(data.table)
 
 DATADIR <- paste0(Sys.getenv("HOME"), "/../data/DrugCentral/DrugRepoDb")
 
+t_start <- Sys.time()
+
 ## Read
 identifier <- read_delim(paste0(DATADIR, "/drugcentral_identifier.tsv"), "\t", col_types = cols(.default = col_character(), parent_match=col_logical()))
 setDT(identifier)
@@ -60,4 +62,6 @@ drugcentral$SYNONYM <- sapply(drugcentral$struct_id, function(x) {
     return(out)
 })
 
+t_elapsed <- (Sys.time()-t_start)
+message(sprintf("Elapsed time: %.2f %s", t_elapsed, attr(t_elapsed, "units")))
 message("Done: (drugcentral.R)")
