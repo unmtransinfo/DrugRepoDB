@@ -26,6 +26,7 @@ UMLS_VERSION <- "2026AA"
 DATADIR <- paste0(Sys.getenv("HOME"), "/../data/DrugCentral/DrugRepoDb")
 
 t0 <- proc.time()
+t_start <- Sys.time()
 
 ## Build Indication Dictionary
 inddict <- data.table(raw=unlist(strsplit(drugcentral$DISEASE_MESH, '\\|')), cui=unlist(strsplit(drugcentral$DISEASE_UMLS, '\\|')), cuname=NA, semType=NA)
@@ -194,3 +195,6 @@ drugs[, NCT := ifelse(NCT == '', NA, NCT)]
 save(drugs, file='R/drugrepodb/drugrepodb.RData')
 #
 message(sprintf("%s, elapsed: %.1fs", Sys.time(), (proc.time()-t0)[3]))
+t_elapsed <- (Sys.time()-t_start)
+message(sprintf("Elapsed time: %.2f %s", t_elapsed, attr(t_elapsed, "units")))
+message("Done: (assemble.R)")
