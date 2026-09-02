@@ -1,11 +1,10 @@
 #!/usr/bin/env Rscript
-###
 ##########################################################################
 # assemble.R - Prepare data for shiny app
-# 2016:  Adam Brown; last update 11/16/16
+# 2016:  Developed by Adam Brown.
 ##########################################################################
 # 2020: Repo forked, updated for DrugCentral-2020 and AACT-20200201.
-# DrugBank maybe not available, nor needed.
+# DrugBank not available, nor needed.
 ##########################################################################
 library(readr)
 library(data.table)

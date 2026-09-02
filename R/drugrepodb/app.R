@@ -1,3 +1,7 @@
+##########################################################################
+# app.R - DrugRepoDb Shiny app
+# 2016:  Developed by Adam Brown.
+##########################################################################
 library(data.table)
 library(shiny)
 library(DT)
@@ -11,8 +15,10 @@ library(plotly)
 ##
 load('drugrepodb.RData')
 #
+drugs[, status := gsub("Approved", "APPROVED", status)]
+#
 message(sprintf("Drugs (DBIDs): %d; Indications: %d; CTs: %d", drugs[, uniqueN(drugbank_id)], drugs[, uniqueN(ind_id)], drugs[, uniqueN(NCT)]))
-message(sprintf("Clinical trials (NCTIDs): %d; Terminated: %d; Withdrawn: %d; Suspended: %d; Approved: %d", drugs[, uniqueN(NCT)], drugs[status == "Terminated", uniqueN(NCT)], drugs[status == "Withdrawn", uniqueN(NCT)], drugs[status == "Suspended", uniqueN(NCT)], drugs[status == "Approved", uniqueN(NCT)]))
+message(sprintf("Clinical trials (NCTIDs): %d; TERMINATED: %d; WITHDRAWN: %d; SUSPENDED: %d; APPROVED: %d", drugs[, uniqueN(NCT)], drugs[status == "TERMINATED", uniqueN(NCT)], drugs[status == "WITHDRAWN", uniqueN(NCT)], drugs[status == "SUSPENDED", uniqueN(NCT)], drugs[status == "APPROVED", uniqueN(NCT)]))
 
 
 ## Status Summary Plotting
@@ -20,7 +26,7 @@ message(sprintf("Clinical trials (NCTIDs): %d; Terminated: %d; Withdrawn: %d; Su
 N_DRUGS <- drugs[, uniqueN(drugbank_id)]
 N_INDS <- drugs[, uniqueN(ind_id)]
 
-drugs[, status := factor(status, levels=c("Approved", "Suspended", "Terminated", "Withdrawn"), ordered=T)]
+drugs[, status := factor(status, levels=c("APPROVED", "SUSPENDED", "TERMINATED", "WITHDRAWN"), ordered=T)]
 
 #################
 # UI Definition #
@@ -69,14 +75,14 @@ ui <- fluidPage(
       uiOutput('drugdrop'),
       checkboxGroupInput('drugcheck',
                 'Select the status categories you\'d like to display',
-                choices = c('Approved','Terminated','Withdrawn','Suspended'),
-                selected = c('Approved','Terminated','Withdrawn','Suspended'),
+                choices = c('APPROVED','TERMINATED','WITHDRAWN','SUSPENDED'),
+                selected = c('APPROVED','TERMINATED','WITHDRAWN','SUSPENDED'),
                 inline=T
       ),
       checkboxGroupInput('phasecheckdrug',
                 'Select the phases you\'d like to display',
-                choices = c('Phase 0', 'Phase 1', 'Phase 2', 'Phase 3'),
-                selected = c('Phase 0', 'Phase 1', 'Phase 2', 'Phase 3'),
+                choices = c('EARLY_PHASE1', 'PHASE1', 'PHASE1/PHASE2', 'PHASE2', 'PHASE2/PHASE3', 'PHASE3', 'PHASE4'),
+                selected = c('EARLY_PHASE1', 'PHASE1', 'PHASE1/PHASE2', 'PHASE2', 'PHASE2/PHASE3', 'PHASE3', 'PHASE4'),
                 inline = T
       ),
       tags$hr(),
@@ -97,14 +103,14 @@ ui <- fluidPage(
       uiOutput('inddrop'),
       checkboxGroupInput('indcheck',
                 'Select the status categories you\'d like to display',
-                choices = c('Approved','Terminated','Withdrawn','Suspended'),
-                selected = c('Approved','Terminated','Withdrawn','Suspended'),
+                choices = c('APPROVED','TERMINATED','WITHDRAWN','SUSPENDED'),
+                selected = c('APPROVED','TERMINATED','WITHDRAWN','SUSPENDED'),
                 inline=T
       ),
       checkboxGroupInput('phasecheckind',
                 'Select the phases you\'d like to display',
-                choices = c('Phase 0', 'Phase 1', 'Phase 2', 'Phase 3'),
-                selected = c('Phase 0', 'Phase 1', 'Phase 2', 'Phase 3'),
+                choices = c('EARLY_PHASE1', 'PHASE1', 'PHASE1/PHASE2', 'PHASE2', 'PHASE2/PHASE3', 'PHASE3', 'PHASE4'),
+                selected = c('EARLY_PHASE1', 'PHASE1', 'PHASE1/PHASE2', 'PHASE2', 'PHASE2/PHASE3', 'PHASE3', 'PHASE4'),
                 inline = T
       ),
       tags$hr(),
@@ -183,7 +189,7 @@ ui <- fluidPage(
 server <- function(input, output, session) {
 
   # Infographic definition
-  # "Approved", "Suspended", "Terminated", "Withdrawn"
+  # "APPROVED", "SUSPENDED", "TERMINATED", "WITHDRAWN"
   output$summary_plot <- renderPlotly({
     status_counts <- drugs[, .(count = .N), by=status][order(status)]
     pivot_data <- dcast(drugs[, .(count = .N), by=c("status", "sem_type")], status ~ sem_type,  value.var="count")
@@ -210,7 +216,7 @@ server <- function(input, output, session) {
       inputId = 'drugdrop',
       label = 'Select a drug from the dropdown menu, or enter a search term:',
       choices = sort(unique(drugs$drug_name)),
-      selected = 'Sitagliptin',
+      selected = 'norfloxacin',
       width = '100%',
       multiple = F,
       options = list(maxOptions = length(unique(drugs$drug_name)))

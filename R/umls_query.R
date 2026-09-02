@@ -1,9 +1,9 @@
 ##########################################################################
 # umls_query.R - Retreive UMLS information
-# 2016: Adam Brown; last Update: 11/30/16
+# 2016: Adam Brown
 ##########################################################################
 # 2020: Repo forked, updated for DrugCentral-2020 and AACT-20200201.
-# DrugBank maybe not available, nor needed.
+# DrugBank not available, nor needed.
 ##########################################################################
 # https://documentation.uts.nlm.nih.gov/rest/home.html
 ##########################################################################
