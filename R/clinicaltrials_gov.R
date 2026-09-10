@@ -1,24 +1,22 @@
 ##########################################################################
 # clinicaltrials_gov.R - Parse clinical trials information
-# 2016: Developed by Adam Brown
-##########################################################################
-# 2020: Repo forked, updated for DrugCentral-2020 and AACT-20200201.
-# DrugBank not available, nor needed.
+# 2016: Developed by Adam Brown.
+# 2020-2026: Updated by Jeremy Yang.
+# Time to execute: 1.8hr (2026)
 ##########################################################################
 library(readr)
 library(data.table)
 
 # drugcentral.R must be run before this code.
+if (!exists("drugcentral")) {
+  source('R/drugcentral.R')
+}
 
 DATADIR <- paste0(Sys.getenv("HOME"), "/../data/DrugCentral/DrugRepoDb")
 
 t_start <- Sys.time()
 
 ## Read
-#clin <- read.table('raw/AACT/clinical_study_noclob.txt', sep = '|', quote='"', header = T, fill = T, stringsAsFactors = F)
-#int <- read.table('raw/AACT/intervention_browse.txt', sep='|', header=T, fill=T, stringsAsFactors = F, quote='"')
-#cond <- fread('raw/AACT/condition_browse.txt', data.table = F)
-#cond <- rbind(fread('raw/AACT/conditions.txt', data.table = F))
 
 clin <- read_delim(paste0(DATADIR, "/aact_studies.tsv.gz"), "\t", col_types=cols(.default=col_character()))
 setDT(clin)
@@ -84,6 +82,21 @@ clin$DrugBankIDs <- sapply(clin$drug_mesh, function(x) {
     else out <- paste(unique(drugcentral[row, DrugBankID]), collapse = '|')
 })
 clin <- clin[!is.na(DrugBankIDs)]
+
+
+clin$DrugCentralIDs <- sapply(clin$drug_mesh, function(x) {
+  mesh <- unlist(strsplit(x, '\\|'))
+  greplist <- rep(NA, length(mesh))
+  for (i in 1:length(mesh)) {
+    greplist[i] <- paste0('^', mesh[i], '$', '|\\|', mesh[i], '$|^', mesh[i], '\\||\\|', mesh[i], '\\|')
+  }
+  grepcall <- paste(greplist, collapse='|')
+  row <- grep(grepcall, drugcentral$SYNONYM)
+  if (length(row) == 0) out <- NA
+  else out <- paste(unique(drugcentral[row, DrugCentralID]), collapse = '|')
+})
+clin <- clin[!is.na(DrugCentralIDs)]
+
 
 message("NCT00454714 in dataset?...", ("NCT00454714" %in% clin$nct_id)) # Check for NCT00454714 (Suspended, for Sildenafil)
 

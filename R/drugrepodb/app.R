@@ -1,6 +1,7 @@
 ##########################################################################
 # app.R - DrugRepoDb Shiny app
 # 2016:  Developed by Adam Brown.
+# 2020-2026: Updated by Jeremy Yang.
 ##########################################################################
 library(data.table)
 library(shiny)
@@ -55,7 +56,7 @@ ui <- fluidPage(
        tags$ul(
          tags$li("Drug-centric searching"),
          tags$li("Disease-centric searching"),
-         tags$li("Full repoDB download")
+         tags$li("Full DrugRepoDB download")
        )
       ),
       
@@ -66,11 +67,11 @@ ui <- fluidPage(
     ## Drug Search Panel
     tabPanel(
       "Drug Search",
-      p(sprintf('DrugRepoDb contains information about %d currently approved drugs (as curated by DrugCentral).
-        To search DrugRepoDb for a specific drug, select a drug and the current statuses you\'d like to display.
-        Drugs are listed with their DrugCentral and DrugBank IDs, for easier integration into your existing pipelines.
-        Search results can be downloaded as a tab-separated values file using the download button below the table
-        of drug indications.', N_DRUGS)
+      p('DrugRepoDb contains information for ', tags$code(sprintf("%d", N_DRUGS)), ' currently approved drugs 
+      (as curated by DrugCentral). To search DrugRepoDb for a specific drug, select a drug and the current statuses 
+      you\'d like to display. Drugs are listed with their DrugCentral and DrugBank IDs, for easier integration into 
+      your existing pipelines. Search results can be downloaded as a tab-separated values file using the download 
+      button below the table of drug indications.'
       ),
       uiOutput('drugdrop'),
       checkboxGroupInput('drugcheck',
@@ -94,11 +95,10 @@ ui <- fluidPage(
     ),
     tabPanel(
       "Disease Search",
-      p(sprintf('DrugRepoDb contains information about %d diseases (indications), all mapped to UMLS terms for easier 
-        integration into your existing pipelines. To search for a specific disease,
-        select a disease and the current statuses you\'d like to display.
-        Search results can be downloaded as a tab-separated values file using the download button below the table
-        of drug indications.', N_INDS)
+      p('DrugRepoDb contains information for ', tags$code(sprintf("%d", N_INDS)), ' diseases (indications), all 
+      mapped to UMLS terms for easier integration into your existing pipelines. To search for a specific disease,
+        select a disease and the current statuses you\'d like to display. Search results can be downloaded as a 
+        tab-separated values file using the download button below the table of drug indications.'
       ),
       uiOutput('inddrop'),
       checkboxGroupInput('indcheck',
@@ -127,7 +127,7 @@ ui <- fluidPage(
        validated before publication."),
       downloadButton(
         outputId = 'downloadFull',
-        label = 'Download the full repoDB Dataset'
+        label = 'Download the full DrugRepoDB Dataset'
       )
     ),
     tabPanel(
@@ -136,13 +136,13 @@ ui <- fluidPage(
       tags$code( "Brown AS and Patel CJ. repoDB: A New Standard for Drug Repositioning Validation.", em("Scientific Data."), "170029 (2017)."),
       tags$br(),
       tags$br(),
-      p("DrugRepoDb was built using the May 16, 2020 release of ",
+      p("DrugRepoDb was built using the September 02, 2026 release of ",
         a("DrugCentral,", href='https://drugcentral.org/download'),
-        "the live version, accessed in June 2020, of the ",
+        "the live version, accessed in September 2026, of the ",
         a("AACT database,", href='https://www.ctti-clinicaltrials.org/aact-database'),
         "and the 2020AA Release of the ",
         a("Unified Medical Language System.", href='https://www.nlm.nih.gov/research/umls/'),
-        "Metformin and recycling symbol used under CC0 license from wikimedia commons. Database symbol by Designmodo,
+        "Metformin and recycling symbol used under CC0 license from Wikimedia Commons. Database symbol by Designmodo,
         used under a CC3.0 license."
       ),
       p(strong("By using the DrugRepoDb database, users agree to cite our work, as well as AACT,
@@ -163,6 +163,7 @@ ui <- fluidPage(
             spotting the discrepancy).'),
         tags$li(strong('v2.0 (June 12, 2020)'), ' - Updated by Jeremy Yang at the University of New Mexico (UNM), with latest versions of DrugCentral, AACT and UMLS.'),
         tags$li(strong('v2.1 (June 15, 2023)'), ' - Updated by Jeremy Yang (UNM), with latest versions of DrugCentral (2023-05-10), AACT (2023-06-14) and UMLS (2023AA).'),
+        tags$li(strong('v2.2 (September 10, 2026)'), ' - Updated by Jeremy Yang (UNM), with latest versions of DrugCentral (2026-09-02), AACT (2026-09-02) and UMLS (2026AA).'),
       )
     )
   ),
@@ -177,7 +178,7 @@ ui <- fluidPage(
     '. In 2020, DrugRepoDb was updated by Jeremy Yang from the University of New Mexico (UNM), SoM, DoIM, ',
     a("Translational Informatics Division", href="https://datascience.unm.edu"),
     ' in cooperation with the original developers, with new versions of DrugCentral, AACT, and UMLS.',
-    ' The 2023 update was also released by UNM.'
+    ' The 2023 and 2026 updates were also released by UNM.'
   )
 )
 

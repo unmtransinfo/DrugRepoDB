@@ -2,9 +2,13 @@
 ##########################################################################
 # assemble.R - Prepare data for shiny app
 # 2016:  Developed by Adam Brown.
+# 2020-2026: Updated by Jeremy Yang.
 ##########################################################################
-# 2020: Repo forked, updated for DrugCentral-2020 and AACT-20200201.
-# DrugBank not available, nor needed.
+# 2026-09-10:
+# Time to execute: 46min
+# Indications mapped to UMLS CUI: 2056; unmapped: 9300
+# Indications mapped to multiple UMLS CUIs: 252
+# Indications with duplicated UMLS CUI Names: 172
 ##########################################################################
 library(readr)
 library(data.table)
@@ -24,7 +28,6 @@ UMLS_VERSION <- "2026AA"
 
 DATADIR <- paste0(Sys.getenv("HOME"), "/../data/DrugCentral/DrugRepoDb")
 
-t0 <- proc.time()
 t_start <- Sys.time()
 
 ## Build Indication Dictionary
@@ -92,14 +95,20 @@ save(inddict, file=paste0(DATADIR, '/indication_dictionary.RData'))
 
 ## Build dataframe
 drugs <- data.table(Drug = character(), Indication = character(),
-                      drug_name = character(), drugbank_id = character(),
-                      ind_name = character(), ind_id=character(),
+                      drug_name = character(), 
+                    drugbank_id = character(),
+                    drugcentral_id = character(),
+                      ind_name = character(), 
+                    ind_id=character(),
                       sem_type = character())
 for (i in 1:nrow(drugcentral)) {
     # Drug Handling
     drugname <- drugcentral$name[i]
     dbid <- drugcentral$DrugBankID[i]
-    drugcomp <- sprintf('<a href="https://www.drugbank.ca/drugs/%s" target="_blank">%s (DBID: %s)</a>', dbid, dbid, drugname)
+    dcid <- drugcentral$DrugCentralID[i]
+    #drugcomp <- sprintf('<a href="https://go.drugbank.com/drugs/%s" target="_blank">%s (DBID: %s)</a>', dbid, dbid, drugname)
+    drugcomp <- sprintf('<a href="https://www.drugcentral.org/drugcard/%s" target="_blank">%s (DCID: %s)</a>', dcid, drugname, dcid)
+    
     
     # Indication Handling
     if (is.na(drugcentral$DISEASE_MESH[i])) {
@@ -115,8 +124,11 @@ for (i in 1:nrow(drugcentral)) {
     indcomp <- paste0(indcunames, ' (CUI: ', indcus, ')')
 
     # Expand
-    comp_dt <- data.table(Drug = rep(drugcomp, length(indcomp)), Indication = indcomp,
-                         drug_name = rep(drugname, length(indcomp)), drugbank_id = rep(dbid, length(indcomp)),
+    comp_dt <- data.table(Drug = rep(drugcomp, length(indcomp)), 
+                         Indication = indcomp,
+                         drug_name = rep(drugname, length(indcomp)), 
+                         drugbank_id = rep(dbid, length(indcomp)),
+                         drugcentral_id = rep(dcid, length(indcomp)),
                          ind_name = indcunames, ind_id = indcus,
                          sem_type = indtypes)
     drugs <- rbind(drugs, comp_dt)
@@ -130,8 +142,11 @@ drugs[, DetailedStatus := NA]
 
 # Failed drugs from Clinical Trials
 failed <- data.table(Drug = character(), Indication = character(),
-                     drug_name = character(), drugbank_id = character(),
-                     ind_name = character(), ind_id=character(),
+                     drug_name = character(), 
+                     drugbank_id = character(),
+                     drugcentral_id = character(),
+                     ind_name = character(), 
+                     ind_id=character(),
                      sem_type = character(),
                      TrialStatus = character(),
                      status = character(),
@@ -143,8 +158,11 @@ for (i in 1:nrow(clin)) {
     # Drug Handling
     drugnames <- unlist(strsplit(clin$DCNAME[i], '\\|'))
     dbids <- unlist(strsplit(clin$DrugBankIDs[i], '\\|'))
-    drugcomp <- sprintf('<a href="https://go.drugbank.com/drugs/%s" target="_blank">%s (DBID: %s)</a>', dbids, drugnames, dbids)
-
+    dcids <- unlist(strsplit(clin$DrugCentralIDs[i], '\\|'))
+    
+    #drugcomp <- sprintf('<a href="https://go.drugbank.com/drugs/%s" target="_blank">%s (DBID: %s)</a>', dbids, drugnames, dbids)
+    drugcomp <- sprintf('<a href="https://www.drugcentral.org/drugcard/%s" target="_blank">%s (DCID: %s)</a>', dcids, drugnames, dcids)
+    
     # Indication Handling
     inds <- unlist(strsplit(clin$DISEASE_MESH[i], '\\|'))
     indcus <- unname(unlist(sapply(inds, function(x) inddict[tolower(raw) == tolower(x), cui])))
@@ -159,9 +177,13 @@ for (i in 1:nrow(clin)) {
 
     # Expand
     comp_dt_set <- expand.grid(c(1:length(drugcomp)), c(1:length(indcomp)))
-    comp_dt <- data.table(Drug = drugcomp[comp_dt_set$Var1], Indication = indcomp[comp_dt_set$Var2],
-                         drug_name = drugnames[comp_dt_set$Var1], drugbank_id = dbids[comp_dt_set$Var1],
-                         ind_name = indcunames[comp_dt_set$Var2], ind_id = indcus[comp_dt_set$Var2],
+    comp_dt <- data.table(Drug = drugcomp[comp_dt_set$Var1], 
+                         Indication = indcomp[comp_dt_set$Var2],
+                         drug_name = drugnames[comp_dt_set$Var1], 
+                         drugbank_id = dbids[comp_dt_set$Var1],
+                         drugcentral_id = dcids[comp_dt_set$Var1],
+                         ind_name = indcunames[comp_dt_set$Var2], 
+                         ind_id = indcus[comp_dt_set$Var2],
                          sem_type = indtypes[comp_dt_set$Var2])
     
     # Add status
@@ -193,7 +215,6 @@ drugs[, NCT := ifelse(NCT == '', NA, NCT)]
 
 save(drugs, file='R/drugrepodb/drugrepodb.RData')
 #
-message(sprintf("%s, elapsed: %.1fs", Sys.time(), (proc.time()-t0)[3]))
 t_elapsed <- (Sys.time()-t_start)
 message(sprintf("Elapsed time: %.2f %s", t_elapsed, attr(t_elapsed, "units")))
 message("Done: (assemble.R)")
