@@ -78,6 +78,9 @@ for (i in 1:nrow(inddict)) {
 }
 message(sprintf("Indications mapped to UMLS CUI: %d; unmapped: %d", nrow(inddict[!is.na(cui)]), nrow(inddict[is.na(cui)])))
 message(sprintf("Indications mapped to multiple UMLS CUIs: %d", n_multimap))
+# Save list of unmapped indications
+write_delim(indict[is.na(cui)], paste0(DATADIR, "/indications_unmapped.tsv"), "\t")
+#
 inddict <- inddict[!is.na(cui) & !is.na(cuname)]
 inddict <- unique(inddict)
 message(sprintf("Indications with duplicated UMLS CUI Names: %d", nrow(inddict[duplicated(cuname)])))
