@@ -82,7 +82,7 @@ getName <- function(cui) {
 # Search
 getCUI <- function(string, search_typ, version, verbose) {
  
-    if (! search_typ %in% c("exact", "words", "leftTruncation", "rightTruncation", "approximate", "normalizedString")) {
+    if (! search_typ %in% c("exact", "words", "leftTruncation", "rightTruncation", "approximate", "normalizedString", "normalizedWords")) {
         warning("Invalid search type")
         break
     }

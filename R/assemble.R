@@ -6,7 +6,7 @@
 ##########################################################################
 # 2026-09-10:
 # Time to execute: 46min
-# Indications mapped to UMLS CUI: 2056; unmapped: 9300
+# Indications mapped to UMLS CUI: 2056; unmapped: 9300 (searchType: normalizedString)
 # Indications mapped to multiple UMLS CUIs: 252
 # Indications with duplicated UMLS CUI Names: 172
 ##########################################################################
@@ -43,7 +43,9 @@ for (i in 1:nrow(inddict)) {
     message(sprintf("%d/%d: %s", i, nrow(inddict), raw))
     # If missing cui, attempt to fill
     if (is.na(inddict$cui[i])) {
-        cuiL <- getCUI(raw, 'normalizedString', UMLS_VERSION, F)
+        #searchType <- 'normalizedString'
+        searchType <- 'normalizedWords' #More inclusive, more recall
+        cuiL <- getCUI(raw, searchType, UMLS_VERSION, F)
         # Don't allow multiple/no matches
         if (length(cuiL) == 0) {
           message(sprintf("No matches for: %s", raw))
@@ -79,7 +81,7 @@ for (i in 1:nrow(inddict)) {
 message(sprintf("Indications mapped to UMLS CUI: %d; unmapped: %d", nrow(inddict[!is.na(cui)]), nrow(inddict[is.na(cui)])))
 message(sprintf("Indications mapped to multiple UMLS CUIs: %d", n_multimap))
 # Save list of unmapped indications
-write_delim(indict[is.na(cui)], paste0(DATADIR, "/indications_unmapped.tsv"), "\t")
+write_delim(inddict[is.na(cui)], paste0(DATADIR, "/indications_unmapped.tsv"), "\t")
 #
 inddict <- inddict[!is.na(cui) & !is.na(cuname)]
 inddict <- unique(inddict)
@@ -91,6 +93,8 @@ inddict <- inddict[semType %in% c('Disease or Syndrome', 'Neoplastic Process', '
                                           'Sign or Symptom', 'Injury or Poisoning', 'Congenital Abnormality', 'Acquired Abnormality',
                                           'Cell or Molecular Dysfunction')]
 # 'Cell or Molecular Dysfunction' still a thing? Apparently no.
+# Save dictionary of indications mapped to UMLS CUIs.
+write_delim(inddict, paste0(DATADIR, "/indication_dictionary.tsv"), "\t")
 save(inddict, file=paste0(DATADIR, '/indication_dictionary.RData'))
 
 #load(paste0(DATADIR, '/indication_dictionary.RData')) #DEBUG
