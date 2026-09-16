@@ -43,23 +43,31 @@ for (i in 1:nrow(inddict)) {
     message(sprintf("%d/%d: %s", i, nrow(inddict), raw))
     # If missing cui, attempt to fill
     if (is.na(inddict$cui[i])) {
-        #searchType <- 'normalizedString'
-        searchType <- 'normalizedWords' #More inclusive, more recall
+        if (grepl('\\w\\s+\\w', raw)) {
+          searchType <- 'normalizedWords' #More inclusive, more recall.
+        } else {
+          searchType <- 'normalizedString' #Avoid excessive matches for single-word terms.
+        }
+        #if (raw == 'Cancer') { #UMLS-API seems to get stuck on this.
+        #  message(sprintf("SKIPPING (%s): \"%s\"", searchType, raw))
+        #  inddict[i, cui := NA]
+        #  next
+        #}
         cuiL <- getCUI(raw, searchType, UMLS_VERSION, F)
         # Don't allow multiple/no matches
         if (length(cuiL) == 0) {
-          message(sprintf("No matches for: %s", raw))
+          message(sprintf("NO MATCH (%s): \"%s\"", searchType, raw))
           inddict[i, cui := NA]
           next
         }
         else if (length(cuiL) > 1) {
-          message(sprintf("Multiple matches for: %s (%s)", raw, paste(cuiL, collapse="|")))
+          message(sprintf("MULTIPLE MATCHES (%s): %s (%s)", searchType, raw, paste(cuiL, collapse="|")))
           inddict[i, cui := NA]
           n_multimap <- n_multimap + 1
           next
         }
         else if (cuiL[[1]][1] == 'NO_CONCEPT_MAPPED_TO') {
-          message(sprintf("NO_CONCEPT_MAPPED_TO: \"%s\"", raw))
+          message(sprintf("NO_CONCEPT_MAPPED_TO (%s): \"%s\"", searchType, raw))
           inddict[i, cui := NA]
           next
         }
@@ -67,7 +75,7 @@ for (i in 1:nrow(inddict)) {
           cui_this <- cuiL[[1]][1]
           # Confirm not NA
           if (is.na(cui_this)) next
-          message(sprintf("Match for: \"%s\" -> %s", raw, cui_this))
+          message(sprintf("MATCH (%s): \"%s\" -> %s", searchType, raw, cui_this))
           inddict[i, cui := cui_this]
           next
         }

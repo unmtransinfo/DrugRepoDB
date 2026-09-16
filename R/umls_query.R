@@ -119,7 +119,7 @@ getCUI <- function(string, search_typ, version, verbose) {
                 attempt <- (attempt + 1)
                 sleep_time <- snooze_time*attempt*runif(1, 0.5, 1)
                 message_for_status(response, paste("mapping term [", string, "]", "[Attempt #", attempt, "]", sep = ""))
-                print(paste("[Now taking a ", sleep_time, " sec break]", sep = ""))
+                print(paste("[Now taking a ", round(sleep_time, digits=2), " sec break]", sep = ""))
                 Sys.sleep(sleep_time)
                 next
             }
