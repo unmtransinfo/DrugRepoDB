@@ -6,8 +6,16 @@
 ##########################################################################
 # 2026-09-10:
 # Time to execute: 46min
-# Indications mapped to UMLS CUI: 2056; unmapped: 9300 (searchType: normalizedString)
+# searchType: normalizedString
+# Indications mapped to UMLS CUI: 2056; unmapped: 9300 
 # Indications mapped to multiple UMLS CUIs: 252
+# Indications with duplicated UMLS CUI Names: 172
+##########################################################################
+# 2026-09-16
+# Time to execute: 48min
+# searchType: normalizedString for single words, normalizedWords for multi-words
+# Indications mapped to UMLS CUI: 2056; unmapped: 9300
+# Indications mapped to multiple UMLS CUIs: 254
 # Indications with duplicated UMLS CUI Names: 172
 ##########################################################################
 library(readr)
