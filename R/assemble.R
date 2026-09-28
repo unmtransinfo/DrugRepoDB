@@ -121,6 +121,8 @@ drugs <- data.table(Drug = character(), Indication = character(),
                       drug_name = character(), 
                     drugbank_id = character(),
                     drugcentral_id = character(),
+                    smiles = character(),
+                    inchikey = character(),
                       ind_name = character(), 
                     ind_id=character(),
                       sem_type = character())
@@ -131,7 +133,8 @@ for (i in 1:nrow(drugcentral)) {
     dcid <- drugcentral$DrugCentralID[i]
     #drugcomp <- sprintf('<a href="https://go.drugbank.com/drugs/%s" target="_blank">%s (DBID: %s)</a>', dbid, dbid, drugname)
     drugcomp <- sprintf('<a href="https://www.drugcentral.org/drugcard/%s" target="_blank">%s (DCID: %s)</a>', dcid, drugname, dcid)
-    
+    smiles <- drugcentral$smiles[i]
+    inchikey <- drugcentral$inchikey[i]
     
     # Indication Handling
     if (is.na(drugcentral$DISEASE_MESH[i])) {
@@ -152,6 +155,8 @@ for (i in 1:nrow(drugcentral)) {
                          drug_name = rep(drugname, length(indcomp)), 
                          drugbank_id = rep(dbid, length(indcomp)),
                          drugcentral_id = rep(dcid, length(indcomp)),
+                         smiles = rep(smiles, length(indcomp)),
+                         inchikey = rep(inchikey, length(indcomp)),
                          ind_name = indcunames, ind_id = indcus,
                          sem_type = indtypes)
     drugs <- rbind(drugs, comp_dt)
@@ -168,6 +173,8 @@ failed <- data.table(Drug = character(), Indication = character(),
                      drug_name = character(), 
                      drugbank_id = character(),
                      drugcentral_id = character(),
+                     smiles = character(),
+                     inchikey = character(),
                      ind_name = character(), 
                      ind_id=character(),
                      sem_type = character(),
@@ -182,6 +189,9 @@ for (i in 1:nrow(clin)) {
     drugnames <- unlist(strsplit(clin$DCNAME[i], '\\|'))
     dbids <- unlist(strsplit(clin$DrugBankIDs[i], '\\|'))
     dcids <- unlist(strsplit(clin$DrugCentralIDs[i], '\\|'))
+    
+    smiless <- lapply(dcids, function(dcid) {return(dcid2smi[dcid])})
+    inchikeys <- lapply(dcids, function(dcid) {return(dcid2inchikey[dcid])})
     
     #drugcomp <- sprintf('<a href="https://go.drugbank.com/drugs/%s" target="_blank">%s (DBID: %s)</a>', dbids, drugnames, dbids)
     drugcomp <- sprintf('<a href="https://www.drugcentral.org/drugcard/%s" target="_blank">%s (DCID: %s)</a>', dcids, drugnames, dcids)

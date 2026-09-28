@@ -33,6 +33,15 @@ drugcentral <- merge(structure, identifier[id_type=="DRUGBANK_ID", .(DrugCentral
 #drugcentral <- identifier[id_type=="DRUGBANK_ID", .(DrugCentralID, DrugBankID=identifier)]
 drugcentral <- merge(drugcentral, synonyms[preferred_name==1, .(DrugCentralID, name)], by.x="DrugCentralID", by.y="DrugCentralID")
 
+###
+dcid2smi <- list()
+dcid2inchikey <- list()
+for (i in 1:nrow(drugcentral)) {
+  dcid <- drugcentral$DrugCentralID[i]
+  dcid2smi[dcid] <- drugcentral$smiles[i]
+  dcid2inchikey[dcid] <- drugcentral$inchikey[i]
+}
+
 ## Indications
 indication[, umls_cui := ifelse(umls_cui=='', NA, umls_cui)]
 drugcentral$DISEASE_MESH <- sapply(drugcentral$DrugCentralID, function(x) {

@@ -262,7 +262,7 @@ server <- function(input, output, session) {
     filename = 'drugrepodb_drugsearch.tsv',
     content = function(file) {
       drugtable <- subset(drugs, drug_name == input$drugdrop & status %in% input$drugcheck & (is.na(phase) | phase %in% input$phasecheckdrug),
-                select = c('drug_name', 'drugcentral_id', 'ind_name', 'ind_id', 'NCT', 'status', 'phase', 'DetailedStatus'))
+                select = c('drug_name', 'drugcentral_id',  'smiles', 'inchikey', 'ind_name', 'ind_id', 'NCT', 'status', 'phase', 'DetailedStatus'))
       write.table(drugtable, file, sep='\t', row.names = F)
     }
   )
@@ -271,7 +271,7 @@ server <- function(input, output, session) {
     filename = 'drugrepodb_diseasesearch.tsv',
     content = function(file) {
       indtable <- subset(drugs, ind_name == input$inddrop & status %in% input$drugcheck & (is.na(phase) | phase %in% input$phasecheckdrug),
-                select = c('drug_name', 'drugcentral_id', 'ind_name', 'ind_id', 'NCT', 'status', 'phase', 'DetailedStatus'))
+                select = c('drug_name', 'drugcentral_id', 'smiles', 'inchikey',  'ind_name', 'ind_id', 'NCT', 'status', 'phase', 'DetailedStatus'))
       write.table(indtable, file, sep='\t', row.names = F)
     }
   )
@@ -280,7 +280,7 @@ server <- function(input, output, session) {
   output$downloadFull <- downloadHandler(
     filename = 'drugrepodb_full.tsv',
     content = function(file) {
-      table <- subset(drugs, select = c('drug_name', 'drugcentral_id', 'ind_name', 'ind_id', 'NCT', 'status', 'phase', 'DetailedStatus'))
+      table <- subset(drugs, select = c('drug_name', 'drugcentral_id', 'smiles', 'inchikey', 'ind_name', 'ind_id', 'NCT', 'status', 'phase', 'DetailedStatus'))
       write.table(table, file, sep = '\t', row.names = FALSE)
     }
   )

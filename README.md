@@ -9,8 +9,8 @@ Web application:<BR>
 
 </div>
 
-___NOTE: Forked from [repoDB](https://github.com/adam-sam-brown/repoDB) 
-in cooperation with original authors, for development, maintenance, and updates by UNM.___
+_NOTE: Forked from [repoDB](https://github.com/adam-sam-brown/repoDB) 
+in cooperation with original authors, for development, maintenance, and updates by UNM._
 
 ## Authors
 
@@ -30,7 +30,14 @@ Drug repositioning is the process of discovering, validating, and marketing prev
 
 ## Release Notes 
 
-Summary of 2022:
+Summary of 2026 update:
+
+* New version of DrugCentral, September 02, 2026.
+* New version of AACT, accessed September 2026.
+* New version of UMLS (2026AA, previously 2020AA).
+* DrugCentralIDs as primary identifier, throughout UI and downloads, DrugBankIDs included as alternate IDs.
+
+Summary of 2022 update:
 
 * New version of DrugCentral, August 22, 2022.
 * New version of AACT, accessed September 2022.
@@ -44,13 +51,6 @@ Summary of 2020 update:
 * Created new bash scripts to automate data extraction from DrugCentral and AACT, using psql/SQL.
 * Revised R code to rely on DrugCentral instead of DrugBank for approval status, but retaining DrugBank IDs.
 * Deployed at <https://unmtid-shinyapps.net/repodb/>.
-
-Summary of 2026 update:
-
-* New version of DrugCentral, September 02, 2026.
-* New version of AACT, accessed September 2026.
-* New version of UMLS (2026AA, previously 2020AA).
-* DrugCentralIDs as primary identifier, throughout UI and downloads, DrugBankIDs included as alternate IDs.
 
 ## Workflow
 
