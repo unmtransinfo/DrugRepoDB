@@ -2,12 +2,18 @@
 ###
 # Get DrugCentral data for DrugRepoDB.
 
-set -x
+#set -x
 
-DBHOST="unmtid-dbs.net"
-DBNAME="drugcentral"
-DBPORT="5433"
+#DBHOST="unmtid-dbs.net"
+#DBNAME="drugcentral"
+#DBPORT="5433"
+#DBUSR="drugman"
+
+DBHOST="localhost"
+DBNAME="drugcentral_09022026"
+DBPORT="5432"
 DBUSR="drugman"
+
 # Credentials normally in $HOME/.pgpass.
 
 cwd=$(pwd)
@@ -30,15 +36,20 @@ printf "PSQL: ${PSQL}\n"
 set -x
 
 ###
-# identifier.csv
+# drugcentral_structure.tsv
+# "struct_id", "smiles", "inchikey"
+$PSQL -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "COPY (SELECT id, smiles, inchikey FROM structures) TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t')" >${DATADIR}/drugcentral_structure.tsv
+#
+###
+# drugcentral_identifier.tsv
 # "id", "identifier", "id_type", "struct_id", "parent_match"
 $PSQL -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "COPY (SELECT * FROM identifier) TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t')" >${DATADIR}/drugcentral_identifier.tsv
 #
 ###
-# synonyms.csv
+# drugcentral_synonyms.tsv
 # "syn_id", "id", "name", "preferred_name", "parent_id", "lname"
 $PSQL -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "COPY (SELECT * FROM synonyms) TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t')" >${DATADIR}/drugcentral_synonyms.tsv
 ###
-# omop_relationship.csv
+# drugcentral_omop_relationship.tsv
 # "id", "struct_id", "concept_id", "relationship_name", "concept_name", "umls_cui", "snomed_full_name", "cui_semantic_type", "snomed_conceptid"
 $PSQL -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "COPY (SELECT * FROM omop_relationship) TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t')" >${DATADIR}/drugcentral_omop_relationship.tsv
