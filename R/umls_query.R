@@ -5,11 +5,11 @@
 ##########################################################################
 # https://documentation.uts.nlm.nih.gov/rest/home.html
 ##########################################################################
-library('httr')
-library('xml2')
-library("stringr")
-library("data.table")
-library("yaml")
+library(httr)
+library(xml2)
+library(stringr)
+library(data.table)
+library(yaml)
 
 ## UMLS
 AUTH_URI <- "https://utslogin.nlm.nih.gov/cas/v1/tickets"

@@ -4,6 +4,7 @@
 # drugcentral.R - Parse DrugCentral information
 # 2016: Developed by Adam Brown.
 # 2020-2026: Updated by Jeremy Yang.
+# 2026: SMILES and Inchikey, from DrugCentral, added to db.
 # Time to execute: 14s (2026)
 ##########################################################################
 library(readr)
