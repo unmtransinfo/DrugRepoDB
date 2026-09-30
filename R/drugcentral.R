@@ -15,9 +15,9 @@ DATADIR <- paste0(Sys.getenv("HOME"), "/../data/DrugCentral/DrugRepoDb")
 t_start <- Sys.time()
 
 ## Read
-structure <- read_delim(paste0(DATADIR, "/drugcentral_structure.tsv"), "\t", col_types = cols(.default = col_character(), parent_match=col_logical()))
+structure <- read_delim(paste0(DATADIR, "/drugcentral_structure.tsv"), "\t", col_types = cols(.default = col_character()))
 setDT(structure)
-setnames(structure, c("id"), c("DrugCentralID"))
+setnames(structure, c("id", "name"), c("DrugCentralID", "DrugCentral_struct_name"))
 identifier <- read_delim(paste0(DATADIR, "/drugcentral_identifier.tsv"), "\t", col_types = cols(.default = col_character(), parent_match=col_logical()))
 setDT(identifier)
 setnames(identifier, c("struct_id"), c("DrugCentralID"))
@@ -26,7 +26,7 @@ setDT(indication)
 setnames(indication, c("struct_id"), c("DrugCentralID"))
 synonyms <- read_delim(paste0(DATADIR, "/drugcentral_synonyms.tsv"), "\t", col_types = cols(.default = col_character()))
 setDT(synonyms)
-setnames(synonyms, "id", "DrugCentralID")
+setnames(synonyms, c("id"), c("DrugCentralID"))
 
 # DrugCentral and DrugBank IDs
 drugcentral <- merge(structure, identifier[id_type=="DRUGBANK_ID", .(DrugCentralID, DrugBankID=identifier)], by.x="DrugCentralID", by.y="DrugCentralID")

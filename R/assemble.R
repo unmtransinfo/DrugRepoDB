@@ -190,8 +190,8 @@ for (i in 1:nrow(clin)) {
     dbids <- unlist(strsplit(clin$DrugBankIDs[i], '\\|'))
     dcids <- unlist(strsplit(clin$DrugCentralIDs[i], '\\|'))
     
-    smiless <- lapply(dcids, function(dcid) {return(dcid2smi[dcid])})
-    inchikeys <- lapply(dcids, function(dcid) {return(dcid2inchikey[dcid])})
+    smiless <- sapply(dcids, function(dcid) {return(unlist(dcid2smi[dcid]))})
+    inchikeys <- sapply(dcids, function(dcid) {return(unlist(dcid2inchikey[dcid]))})
     
     #drugcomp <- sprintf('<a href="https://go.drugbank.com/drugs/%s" target="_blank">%s (DBID: %s)</a>', dbids, drugnames, dbids)
     drugcomp <- sprintf('<a href="https://www.drugcentral.org/drugcard/%s" target="_blank">%s (DCID: %s)</a>', dcids, drugnames, dcids)
@@ -215,6 +215,8 @@ for (i in 1:nrow(clin)) {
                          drug_name = drugnames[comp_dt_set$Var1], 
                          drugbank_id = dbids[comp_dt_set$Var1],
                          drugcentral_id = dcids[comp_dt_set$Var1],
+                         smiles = sapply(dcids[comp_dt_set$Var1], function(dcid) {return(unlist(dcid2smi[dcid]))}),
+                         inchikey = sapply(dcids[comp_dt_set$Var1], function(dcid) {return(unlist(dcid2inchikey[dcid]))}),
                          ind_name = indcunames[comp_dt_set$Var2], 
                          ind_id = indcus[comp_dt_set$Var2],
                          sem_type = indtypes[comp_dt_set$Var2])

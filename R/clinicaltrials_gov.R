@@ -100,9 +100,11 @@ clin <- clin[!is.na(DrugCentralIDs)]
 
 message("NCT00454714 in dataset?...", ("NCT00454714" %in% clin$nct_id)) # Check for NCT00454714 (Suspended, for Sildenafil)
 
-
+# "name" field from DC synonyms, almost identical to name from structures.
 clin$DCNAME <- sapply(clin$DrugBankIDs, function(x) paste(drugcentral[DrugBankID %in% unlist(strsplit(x, '\\|')), first(name)], collapse='|'))
 # Delimited name count must match delimited DrugBankId count? Check?
+
+# SWITCH TO DrugCentralIDs?
 
 ## Add conditions
 clin$DISEASE_MESH <- sapply(clin$nct_id, function(x) {

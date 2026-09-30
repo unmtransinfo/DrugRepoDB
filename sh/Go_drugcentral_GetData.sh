@@ -10,7 +10,7 @@
 #DBUSR="drugman"
 
 DBHOST="localhost"
-DBNAME="drugcentral_09022026"
+DBNAME="drugcentral"
 DBPORT="5432"
 DBUSR="drugman"
 
@@ -37,8 +37,8 @@ set -x
 
 ###
 # drugcentral_structure.tsv
-# "struct_id", "smiles", "inchikey"
-$PSQL -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "COPY (SELECT id, smiles, inchikey FROM structures) TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t')" >${DATADIR}/drugcentral_structure.tsv
+# "struct_id", "name", "smiles", "inchikey"
+$PSQL -h $DBHOST -p $DBPORT -d $DBNAME -U $DBUSR -c "COPY (SELECT id, name, smiles, inchikey FROM structures) TO STDOUT WITH (FORMAT CSV,HEADER,DELIMITER E'\t')" >${DATADIR}/drugcentral_structure.tsv
 #
 ###
 # drugcentral_identifier.tsv
